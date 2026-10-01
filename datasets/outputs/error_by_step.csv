@@ -1,0 +1,145 @@
+variable,step,model,mae
+cpi,1,ARIMA,0.493753
+cpi,2,ARIMA,0.875380
+cpi,3,ARIMA,1.182873
+cpi,4,ARIMA,1.184641
+cpi,5,ARIMA,1.541315
+cpi,6,ARIMA,1.436979
+cpi,7,ARIMA,1.705370
+cpi,8,ARIMA,2.496516
+cpi,9,ARIMA,2.432230
+cpi,10,ARIMA,2.371809
+cpi,11,ARIMA,2.235317
+cpi,12,ARIMA,2.563499
+cpi,1,ETS,0.571048
+cpi,2,ETS,0.906586
+cpi,3,ETS,1.170399
+cpi,4,ETS,1.321237
+cpi,5,ETS,1.787860
+cpi,6,ETS,1.893759
+cpi,7,ETS,2.171079
+cpi,8,ETS,2.942468
+cpi,9,ETS,2.985837
+cpi,10,ETS,3.081642
+cpi,11,ETS,2.946060
+cpi,12,ETS,3.362035
+cpi,1,Linear Regression,2.544999
+cpi,2,Linear Regression,2.437907
+cpi,3,Linear Regression,2.480814
+cpi,4,Linear Regression,2.323721
+cpi,5,Linear Regression,2.666629
+cpi,6,Linear Regression,2.709536
+cpi,7,Linear Regression,2.615454
+cpi,8,Linear Regression,3.010087
+cpi,9,Linear Regression,2.821387
+cpi,10,Linear Regression,2.716020
+cpi,11,Linear Regression,2.843987
+cpi,12,Linear Regression,2.921953
+cpi,1,Moving Average,0.888889
+cpi,2,Moving Average,1.038889
+cpi,3,Moving Average,1.405556
+cpi,4,Moving Average,1.838889
+cpi,5,Moving Average,2.738889
+cpi,6,Moving Average,3.072222
+cpi,7,Moving Average,3.472222
+cpi,8,Moving Average,3.922222
+cpi,9,Moving Average,3.922222
+cpi,10,Moving Average,4.072222
+cpi,11,Moving Average,4.555556
+cpi,12,Moving Average,5.122222
+inflation,1,ARIMA,0.450000
+inflation,2,ARIMA,0.750000
+inflation,3,ARIMA,1.016667
+inflation,4,ARIMA,1.016667
+inflation,5,ARIMA,1.333333
+inflation,6,ARIMA,1.250000
+inflation,7,ARIMA,1.433333
+inflation,8,ARIMA,2.033333
+inflation,9,ARIMA,1.966667
+inflation,10,ARIMA,1.916667
+inflation,11,ARIMA,1.816667
+inflation,12,ARIMA,2.050000
+inflation,1,ETS,0.516667
+inflation,2,ETS,0.783333
+inflation,3,ETS,1.033333
+inflation,4,ETS,1.133333
+inflation,5,ETS,1.516667
+inflation,6,ETS,1.633333
+inflation,7,ETS,1.800000
+inflation,8,ETS,2.383333
+inflation,9,ETS,2.433333
+inflation,10,ETS,2.550000
+inflation,11,ETS,2.400000
+inflation,12,ETS,2.700000
+inflation,1,Linear Regression,2.200000
+inflation,2,Linear Regression,2.100000
+inflation,3,Linear Regression,2.133333
+inflation,4,Linear Regression,2.000000
+inflation,5,Linear Regression,2.283333
+inflation,6,Linear Regression,2.316667
+inflation,7,Linear Regression,2.200000
+inflation,8,Linear Regression,2.500000
+inflation,9,Linear Regression,2.333333
+inflation,10,Linear Regression,2.216667
+inflation,11,Linear Regression,2.366667
+inflation,12,Linear Regression,2.400000
+inflation,1,Moving Average,0.750000
+inflation,2,Moving Average,0.916667
+inflation,3,Moving Average,1.183333
+inflation,4,Moving Average,1.550000
+inflation,5,Moving Average,2.283333
+inflation,6,Moving Average,2.550000
+inflation,7,Moving Average,2.900000
+inflation,8,Moving Average,3.216667
+inflation,9,Moving Average,3.216667
+inflation,10,Moving Average,3.333333
+inflation,11,Moving Average,3.716667
+inflation,12,Moving Average,4.133333
+purchasing_power,1,ARIMA,0.003333
+purchasing_power,2,ARIMA,0.006667
+purchasing_power,3,ARIMA,0.011667
+purchasing_power,4,ARIMA,0.008333
+purchasing_power,5,ARIMA,0.013333
+purchasing_power,6,ARIMA,0.011667
+purchasing_power,7,ARIMA,0.010000
+purchasing_power,8,ARIMA,0.016667
+purchasing_power,9,ARIMA,0.015000
+purchasing_power,10,ARIMA,0.016667
+purchasing_power,11,ARIMA,0.010000
+purchasing_power,12,ARIMA,0.015000
+purchasing_power,1,ETS,0.003333
+purchasing_power,2,ETS,0.005000
+purchasing_power,3,ETS,0.010000
+purchasing_power,4,ETS,0.010000
+purchasing_power,5,ETS,0.013333
+purchasing_power,6,ETS,0.013333
+purchasing_power,7,ETS,0.013333
+purchasing_power,8,ETS,0.021667
+purchasing_power,9,ETS,0.021667
+purchasing_power,10,ETS,0.018333
+purchasing_power,11,ETS,0.016667
+purchasing_power,12,ETS,0.021667
+purchasing_power,1,Linear Regression,0.013333
+purchasing_power,2,Linear Regression,0.015000
+purchasing_power,3,Linear Regression,0.018333
+purchasing_power,4,Linear Regression,0.013333
+purchasing_power,5,Linear Regression,0.015000
+purchasing_power,6,Linear Regression,0.016667
+purchasing_power,7,Linear Regression,0.016667
+purchasing_power,8,Linear Regression,0.020000
+purchasing_power,9,Linear Regression,0.016667
+purchasing_power,10,Linear Regression,0.016667
+purchasing_power,11,Linear Regression,0.018333
+purchasing_power,12,Linear Regression,0.018333
+purchasing_power,1,Moving Average,0.001667
+purchasing_power,2,Moving Average,0.003333
+purchasing_power,3,Moving Average,0.005000
+purchasing_power,4,Moving Average,0.008333
+purchasing_power,5,Moving Average,0.016667
+purchasing_power,6,Moving Average,0.018333
+purchasing_power,7,Moving Average,0.020000
+purchasing_power,8,Moving Average,0.021667
+purchasing_power,9,Moving Average,0.020000
+purchasing_power,10,Moving Average,0.021667
+purchasing_power,11,Moving Average,0.026667
+purchasing_power,12,Moving Average,0.030000

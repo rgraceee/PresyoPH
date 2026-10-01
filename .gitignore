@@ -1,0 +1,25 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Streamlit local secrets
+.streamlit/secrets.toml
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Local files not part of the project
+*.pdf
+PresyoPH_revisions.md
+/CPI.csv
+/Inflation.csv
+/Purchasing-Power.csv
+/FIES.csv
+/clean.py
+notebooks/test.ipynb

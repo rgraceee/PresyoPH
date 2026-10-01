@@ -1,0 +1,121 @@
+evaluation,period,model,variable,mae,rmse,mape,n_months,is_selected_model,used_for_selection
+pooled,all six origins,ARIMA,cpi,1.709974,2.008801,1.355625,72.000000,True,True
+pooled,all six origins,ARIMA,inflation,1.419444,1.661074,42.717015,72.000000,True,True
+pooled,all six origins,ARIMA,purchasing_power,0.011528,0.013894,1.448696,72.000000,True,True
+pooled,all six origins,Linear Regression,cpi,2.674374,3.143826,2.154672,72.000000,False,True
+pooled,all six origins,Linear Regression,inflation,2.254167,2.692969,56.025582,72.000000,False,True
+pooled,all six origins,Linear Regression,purchasing_power,0.016528,0.020649,2.044288,72.000000,False,True
+pooled,all six origins,Moving Average,cpi,3.004167,3.709841,2.372553,72.000000,False,True
+pooled,all six origins,Moving Average,inflation,2.479167,3.053118,63.313068,72.000000,False,True
+pooled,all six origins,Moving Average,purchasing_power,0.016111,0.021148,2.041174,72.000000,False,True
+pooled,all six origins,ETS,cpi,2.095001,2.611733,1.659519,72.000000,False,True
+pooled,all six origins,ETS,inflation,1.740278,2.162849,50.106459,72.000000,False,True
+pooled,all six origins,ETS,purchasing_power,0.014028,0.017912,1.764380,72.000000,False,True
+main_test,full test (Sep 2025 - Aug 2026),ARIMA,cpi,1.972332,2.537198,1.462698,12.000000,True,False
+main_test,full test (Sep 2025 - Aug 2026),ARIMA,inflation,1.550000,1.992486,33.493374,12.000000,True,False
+main_test,full test (Sep 2025 - Aug 2026),ARIMA,purchasing_power,0.011667,0.014720,1.568275,12.000000,True,False
+main_test,full test (Sep 2025 - Aug 2026),Linear Regression,cpi,1.757990,1.934657,1.321345,12.000000,False,False
+main_test,full test (Sep 2025 - Aug 2026),Linear Regression,inflation,1.375000,1.510243,46.297613,12.000000,False,False
+main_test,full test (Sep 2025 - Aug 2026),Linear Regression,purchasing_power,0.009167,0.011180,1.215879,12.000000,False,False
+main_test,full test (Sep 2025 - Aug 2026),Moving Average,cpi,4.750000,5.671469,3.529928,12.000000,False,False
+main_test,full test (Sep 2025 - Aug 2026),Moving Average,inflation,3.708333,4.436309,85.686860,12.000000,False,False
+main_test,full test (Sep 2025 - Aug 2026),Moving Average,purchasing_power,0.025000,0.031091,3.373059,12.000000,False,False
+main_test,full test (Sep 2025 - Aug 2026),ETS,cpi,2.670623,3.421712,1.978259,12.000000,False,False
+main_test,full test (Sep 2025 - Aug 2026),ETS,inflation,2.091667,2.673481,43.127315,12.000000,False,False
+main_test,full test (Sep 2025 - Aug 2026),ETS,purchasing_power,0.015833,0.020207,2.135733,12.000000,False,False
+main_test,before shock (Sep 2025 - Feb 2026),ARIMA,cpi,0.535244,0.592254,0.413652,6.000000,True,False
+main_test,before shock (Sep 2025 - Feb 2026),ARIMA,inflation,0.416667,0.460072,23.924292,6.000000,True,False
+main_test,before shock (Sep 2025 - Feb 2026),ARIMA,purchasing_power,0.005000,0.007071,0.646649,6.000000,True,False
+main_test,before shock (Sep 2025 - Feb 2026),Linear Regression,cpi,1.490390,1.577578,1.152382,6.000000,False,False
+main_test,before shock (Sep 2025 - Feb 2026),Linear Regression,inflation,1.183333,1.256317,68.346950,6.000000,False,False
+main_test,before shock (Sep 2025 - Feb 2026),Linear Regression,purchasing_power,0.008333,0.010801,1.071151,6.000000,False,False
+main_test,before shock (Sep 2025 - Feb 2026),Moving Average,cpi,1.866667,2.168973,1.432085,6.000000,False,False
+main_test,before shock (Sep 2025 - Feb 2026),Moving Average,inflation,1.433333,1.666333,73.469499,6.000000,False,False
+main_test,before shock (Sep 2025 - Feb 2026),Moving Average,purchasing_power,0.008333,0.012247,1.093643,6.000000,False,False
+main_test,before shock (Sep 2025 - Feb 2026),ETS,cpi,0.670768,0.798472,0.514498,6.000000,False,False
+main_test,before shock (Sep 2025 - Feb 2026),ETS,inflation,0.533333,0.629815,27.216776,6.000000,False,False
+main_test,before shock (Sep 2025 - Feb 2026),ETS,purchasing_power,0.005000,0.007071,0.652272,6.000000,False,False
+main_test,after shock (Mar 2026 - Aug 2026),ARIMA,cpi,3.409421,3.538924,2.511743,6.000000,True,False
+main_test,after shock (Mar 2026 - Aug 2026),ARIMA,inflation,2.683333,2.779988,43.062457,6.000000,True,False
+main_test,after shock (Mar 2026 - Aug 2026),ARIMA,purchasing_power,0.018333,0.019579,2.489901,6.000000,True,False
+main_test,after shock (Mar 2026 - Aug 2026),Linear Regression,cpi,2.025590,2.235407,1.490308,6.000000,False,False
+main_test,after shock (Mar 2026 - Aug 2026),Linear Regression,inflation,1.566667,1.727233,24.248276,6.000000,False,False
+main_test,after shock (Mar 2026 - Aug 2026),Linear Regression,purchasing_power,0.010000,0.011547,1.360607,6.000000,False,False
+main_test,after shock (Mar 2026 - Aug 2026),Moving Average,cpi,7.633333,7.721831,5.627770,6.000000,False,False
+main_test,after shock (Mar 2026 - Aug 2026),Moving Average,inflation,5.983333,6.048554,97.904220,6.000000,False,False
+main_test,after shock (Mar 2026 - Aug 2026),Moving Average,purchasing_power,0.041667,0.042230,5.652474,6.000000,False,False
+main_test,after shock (Mar 2026 - Aug 2026),ETS,cpi,4.670478,4.772700,3.442020,6.000000,False,False
+main_test,after shock (Mar 2026 - Aug 2026),ETS,inflation,3.650000,3.728047,59.037854,6.000000,False,False
+main_test,after shock (Mar 2026 - Aug 2026),ETS,purchasing_power,0.026667,0.027689,3.619195,6.000000,False,False
+rolling_fold,origin 2022-08,ARIMA,cpi,1.833693,2.015244,1.518217,12.000000,True,False
+rolling_fold,origin 2022-08,ARIMA,inflation,1.633333,1.797220,23.229646,12.000000,True,False
+rolling_fold,origin 2022-08,ARIMA,purchasing_power,0.011667,0.014720,1.409440,12.000000,True,False
+rolling_fold,origin 2022-08,Linear Regression,cpi,5.182095,5.262238,4.299940,12.000000,False,False
+rolling_fold,origin 2022-08,Linear Regression,inflation,4.600000,4.667619,67.792266,12.000000,False,False
+rolling_fold,origin 2022-08,Linear Regression,purchasing_power,0.035833,0.036856,4.311952,12.000000,False,False
+rolling_fold,origin 2022-08,Moving Average,cpi,4.633333,4.900624,3.834340,12.000000,False,False
+rolling_fold,origin 2022-08,Moving Average,inflation,4.083333,4.295540,62.153091,12.000000,False,False
+rolling_fold,origin 2022-08,Moving Average,purchasing_power,0.026667,0.029155,3.220401,12.000000,False,False
+rolling_fold,origin 2022-08,ETS,cpi,2.499252,2.750382,2.065215,12.000000,False,False
+rolling_fold,origin 2022-08,ETS,inflation,2.216667,2.425558,33.724077,12.000000,False,False
+rolling_fold,origin 2022-08,ETS,purchasing_power,0.017500,0.020207,2.117063,12.000000,False,False
+rolling_fold,origin 2023-02,ARIMA,cpi,2.435065,2.574559,1.978385,12.000000,True,False
+rolling_fold,origin 2023-02,ARIMA,inflation,2.075000,2.182697,47.811163,12.000000,True,False
+rolling_fold,origin 2023-02,ARIMA,purchasing_power,0.018333,0.019149,2.243698,12.000000,True,False
+rolling_fold,origin 2023-02,Linear Regression,cpi,3.877975,3.931143,3.152602,12.000000,False,False
+rolling_fold,origin 2023-02,Linear Regression,inflation,3.291667,3.331291,71.020086,12.000000,False,False
+rolling_fold,origin 2023-02,Linear Regression,purchasing_power,0.023333,0.024152,2.863554,12.000000,False,False
+rolling_fold,origin 2023-02,Moving Average,cpi,2.066667,2.631751,1.665664,12.000000,False,False
+rolling_fold,origin 2023-02,Moving Average,inflation,1.708333,2.176580,42.710432,12.000000,False,False
+rolling_fold,origin 2023-02,Moving Average,purchasing_power,0.012500,0.017078,1.549671,12.000000,False,False
+rolling_fold,origin 2023-02,ETS,cpi,3.474598,3.657926,2.820909,12.000000,False,False
+rolling_fold,origin 2023-02,ETS,inflation,2.983333,3.119295,68.375871,12.000000,False,False
+rolling_fold,origin 2023-02,ETS,purchasing_power,0.025833,0.026615,3.165983,12.000000,False,False
+rolling_fold,origin 2023-08,ARIMA,cpi,1.312675,1.388125,1.047251,12.000000,True,False
+rolling_fold,origin 2023-08,ARIMA,inflation,1.091667,1.151448,29.504531,12.000000,True,False
+rolling_fold,origin 2023-08,ARIMA,purchasing_power,0.009167,0.010408,1.145898,12.000000,True,False
+rolling_fold,origin 2023-08,Linear Regression,cpi,2.972446,3.000392,2.377242,12.000000,False,False
+rolling_fold,origin 2023-08,Linear Regression,inflation,2.450000,2.479247,62.877930,12.000000,False,False
+rolling_fold,origin 2023-08,Linear Regression,purchasing_power,0.017500,0.018028,2.183772,12.000000,False,False
+rolling_fold,origin 2023-08,Moving Average,cpi,3.508333,3.639025,2.798432,12.000000,False,False
+rolling_fold,origin 2023-08,Moving Average,inflation,2.900000,2.999722,76.523518,12.000000,False,False
+rolling_fold,origin 2023-08,Moving Average,purchasing_power,0.018333,0.019579,2.294434,12.000000,False,False
+rolling_fold,origin 2023-08,ETS,cpi,0.417302,0.499727,0.333863,12.000000,False,False
+rolling_fold,origin 2023-08,ETS,inflation,0.341667,0.427200,8.558827,12.000000,False,False
+rolling_fold,origin 2023-08,ETS,purchasing_power,0.001667,0.004082,0.208333,12.000000,False,False
+rolling_fold,origin 2024-02,ARIMA,cpi,1.275398,1.422063,1.005256,12.000000,True,False
+rolling_fold,origin 2024-02,ARIMA,inflation,1.016667,1.124722,39.035835,12.000000,True,False
+rolling_fold,origin 2024-02,ARIMA,purchasing_power,0.009167,0.009574,1.159120,12.000000,True,False
+rolling_fold,origin 2024-02,Linear Regression,cpi,1.264866,1.361820,1.000469,12.000000,False,False
+rolling_fold,origin 2024-02,Linear Regression,inflation,1.033333,1.114301,32.311972,12.000000,False,False
+rolling_fold,origin 2024-02,Linear Regression,purchasing_power,0.006667,0.008165,0.842631,12.000000,False,False
+rolling_fold,origin 2024-02,Moving Average,cpi,1.816667,2.057102,1.429073,12.000000,False,False
+rolling_fold,origin 2024-02,Moving Average,inflation,1.466667,1.661325,53.693523,12.000000,False,False
+rolling_fold,origin 2024-02,Moving Average,purchasing_power,0.009167,0.011902,1.168452,12.000000,False,False
+rolling_fold,origin 2024-02,ETS,cpi,1.972555,2.131589,1.554533,12.000000,False,False
+rolling_fold,origin 2024-02,ETS,inflation,1.591667,1.711481,59.275660,12.000000,False,False
+rolling_fold,origin 2024-02,ETS,purchasing_power,0.014167,0.015000,1.793418,12.000000,False,False
+rolling_fold,origin 2024-08,ARIMA,cpi,1.430678,1.770759,1.121946,12.000000,True,False
+rolling_fold,origin 2024-08,ARIMA,inflation,1.150000,1.414214,83.227540,12.000000,True,False
+rolling_fold,origin 2024-08,ARIMA,purchasing_power,0.009167,0.012583,1.165747,12.000000,True,False
+rolling_fold,origin 2024-08,Linear Regression,cpi,0.990876,1.247802,0.776433,12.000000,False,False
+rolling_fold,origin 2024-08,Linear Regression,inflation,0.775000,0.979371,55.853626,12.000000,False,False
+rolling_fold,origin 2024-08,Linear Regression,purchasing_power,0.006667,0.010000,0.847939,12.000000,False,False
+rolling_fold,origin 2024-08,Moving Average,cpi,1.250000,1.412641,0.977879,12.000000,False,False
+rolling_fold,origin 2024-08,Moving Average,inflation,1.008333,1.140541,59.110984,12.000000,False,False
+rolling_fold,origin 2024-08,Moving Average,purchasing_power,0.005000,0.007071,0.641026,12.000000,False,False
+rolling_fold,origin 2024-08,ETS,cpi,1.535675,1.865577,1.204338,12.000000,False,False
+rolling_fold,origin 2024-08,ETS,inflation,1.216667,1.481553,87.577003,12.000000,False,False
+rolling_fold,origin 2024-08,ETS,purchasing_power,0.009167,0.012583,1.165747,12.000000,False,False
+rolling_average,mean of five folds,ARIMA,cpi,1.657502,1.834150,1.334211,,True,False
+rolling_average,mean of five folds,ARIMA,inflation,1.393333,1.534060,44.561743,,True,False
+rolling_average,mean of five folds,ARIMA,purchasing_power,0.011500,0.013287,1.424781,,True,False
+rolling_average,mean of five folds,Linear Regression,cpi,2.857651,2.960679,2.321337,,False,False
+rolling_average,mean of five folds,Linear Regression,inflation,2.430000,2.514366,57.971176,,False,False
+rolling_average,mean of five folds,Linear Regression,purchasing_power,0.018000,0.019440,2.209970,,False,False
+rolling_average,mean of five folds,Moving Average,cpi,2.655000,2.928228,2.141078,,False,False
+rolling_average,mean of five folds,Moving Average,inflation,2.233333,2.454742,58.838310,,False,False
+rolling_average,mean of five folds,Moving Average,purchasing_power,0.014333,0.016957,1.774797,,False,False
+rolling_average,mean of five folds,ETS,cpi,1.979876,2.181040,1.595771,,False,False
+rolling_average,mean of five folds,ETS,inflation,1.670000,1.833017,51.502288,,False,False
+rolling_average,mean of five folds,ETS,purchasing_power,0.013667,0.015697,1.690109,,False,False

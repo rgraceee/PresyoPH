@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-10-01T14:05:02",
+  "final_model": "ARIMA",
+  "selection": {
+    "variable": "cpi",
+    "basis": "pooled",
+    "rule": "Lowest error on at least 2 of MAE, RMSE, MAPE; otherwise lowest RMSE.",
+    "explanation": "ARIMA has the lowest MAE, RMSE, MAPE (3 of 3 metrics).",
+    "metric_wins": {
+      "ARIMA": 3,
+      "Linear Regression": 0,
+      "Moving Average": 0
+    },
+    "eligible_models": [
+      "ARIMA",
+      "Linear Regression",
+      "Moving Average"
+    ]
+  },
+  "data": {
+    "series": "PHILIPPINES, 0 - ALL ITEMS",
+    "start": "2018-01",
+    "end": "2026-08",
+    "train_end": "2025-08",
+    "test": "2025-09 to 2026-08",
+    "rolling_origins": [
+      "2022-08",
+      "2023-02",
+      "2023-08",
+      "2024-02",
+      "2024-08"
+    ]
+  },
+  "forecast": {
+    "origin": "2026-08",
+    "horizon_months": 12,
+    "dashboard_horizons": [
+      3,
+      6,
+      12
+    ],
+    "interval_level": 0.95
+  },
+  "final_model_params": {
+    "ARIMA": {
+      "order": [
+        0,
+        1,
+        1
+      ],
+      "seasonal_order": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "aic": 179.1990449090025,
+      "drift_per_month": 0.3830893366197122
+    },
+    "Linear Regression": {
+      "intercept": 95.27697908887228,
+      "slope_per_month": 0.37741651552331223,
+      "r_squared": 0.9746355800729384
+    },
+    "Moving Average": {
+      "k": 3,
+      "level": 135.83333333333334
+    },
+    "ETS": {
+      "damped_trend": false,
+      "aic": 193.13851793729862,
+      "smoothing_level": 0.9999,
+      "smoothing_trend": 9.999000000000001e-05
+    }
+  },
+  "notes": [
+    "Only CPI is modeled. Inflation and purchasing power are derived from the CPI forecast.",
+    "ETS is not in the proposal and is reported for comparison only.",
+    "The selection basis was changed from the main test to the pooled six origins after the results were seen.",
+    "Forecasts rely only on historical CPI and do not account for external factors."
+  ]
+}
