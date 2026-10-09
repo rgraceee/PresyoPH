@@ -23,3 +23,9 @@ PresyoPH_revisions.md
 /FIES.csv
 /clean.py
 notebooks/test.ipynb
+
+# Local database exports
+database/presyoph_db.sql
+
+# R session history
+.Rhistory
