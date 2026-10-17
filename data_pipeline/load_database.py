@@ -1,3 +1,10 @@
+# Loads the cleaned CSVs in datasets/processed/ into presyoph_db.
+# Run database/schema.sql first.
+#
+# Inserts use INSERT IGNORE, so rows that already exist are skipped, not
+# updated. To refresh the data, drop and recreate the database, then load.
+
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -21,11 +28,13 @@ FIES_FILE = PROCESSED_DIR / "fies_clean.csv"
 # CONNECT TO MYSQL
 # ==========================================
 
+# Same settings and XAMPP defaults as backend/sources.py.
 connection = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="presyoph_db"
+    host=os.getenv("DB_HOST", "localhost"),
+    port=int(os.getenv("DB_PORT", "3306")),
+    user=os.getenv("DB_USER", "root"),
+    password=os.getenv("DB_PASSWORD", ""),
+    database=os.getenv("DB_NAME", "presyoph_db")
 )
 
 cursor = connection.cursor()
