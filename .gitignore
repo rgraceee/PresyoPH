@@ -24,8 +24,5 @@ PresyoPH_revisions.md
 /clean.py
 notebooks/test.ipynb
 
-# Local database exports
-database/presyoph_db.sql
-
 # R session history
 .Rhistory

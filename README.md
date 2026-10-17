@@ -27,22 +27,17 @@ python3 -m venv .venv
 ### 2. Database
 
 1. Open the XAMPP Control Panel and start **MySQL**.
-2. Create the database. The dump does not create it, so this step is required:
-
-   ```sql
-   CREATE DATABASE presyoph_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
-
-   You can run this in phpMyAdmin (http://localhost/phpmyadmin, SQL tab) or with
-   `C:\xampp\mysql\bin\mysql -u root -e "<statement>"`.
-3. Import the data from `database/presyoph_db.sql`. In phpMyAdmin, select
-   `presyoph_db` and use **Import**. From a terminal:
+2. Import `database/presyoph_db.sql`. It creates the `presyoph_db` database
+   and loads the data. In phpMyAdmin (http://localhost/phpmyadmin), open the
+   **Import** tab without selecting a database. From a terminal:
 
    ```powershell
-   cmd /c "C:\xampp\mysql\bin\mysql -u root presyoph_db < database\presyoph_db.sql"
+   cmd /c "C:\xampp\mysql\bin\mysql -u root < database\presyoph_db.sql"
    ```
 
-4. Check the import. These row counts should match:
+   To re-import, drop the old database first (`DROP DATABASE presyoph_db;`),
+   since the dump does not overwrite existing tables.
+3. Check the import. These row counts should match:
 
    | Table              | Rows    |
    |--------------------|---------|
