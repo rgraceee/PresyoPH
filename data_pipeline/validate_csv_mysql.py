@@ -27,7 +27,7 @@ connection = mysql.connector.connect(
 
 
 print("\n========================================")
-print("PRESYOPH CPI CSV ↔ MYSQL DIAGNOSIS")
+print("PRESYOPH CPI CSV <-> MYSQL DIAGNOSIS")
 print("========================================")
 
 
@@ -392,14 +392,14 @@ all_match = (
 
 if all_match:
 
-    print("CPI CSV ↔ MySQL: PASS")
+    print("CPI CSV <-> MySQL: PASS")
     print(
         "All CPI records and values match."
     )
 
 else:
 
-    print("CPI CSV ↔ MySQL: FAIL")
+    print("CPI CSV <-> MySQL: FAIL")
     print(
         "The output above shows which "
         "column has differences."
