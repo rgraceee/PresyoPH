@@ -1,7 +1,8 @@
 """Tests for backend/data.py. Run with:  .venv/Scripts/python -m pytest
 
-They read the raw PSA files and datasets/outputs/, so run the pipeline
-(`python -m modeling.run_pipeline`) first.
+They need MySQL running with presyoph_db imported (see README.md), and they
+read datasets/outputs/, so run the pipeline (`python -m modeling.run_pipeline`)
+first.
 """
 
 import pandas as pd

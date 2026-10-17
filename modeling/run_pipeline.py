@@ -15,9 +15,9 @@ from pathlib import Path
 
 import pandas as pd
 
+from backend.sources import series
 from modeling import config
 from modeling import evaluation as ev
-from modeling.temp_loader import load_cpi, load_inflation, load_purchasing_power
 
 OUTPUT_DIR = Path(__file__).resolve().parents[1] / "datasets" / "outputs"
 
@@ -38,12 +38,8 @@ def _metrics_rows(metrics, evaluation, period):
 
 
 def run():
-    cpi = load_cpi()
-    actuals = {
-        "cpi": cpi,
-        "inflation": load_inflation(),
-        "purchasing_power": load_purchasing_power(),
-    }
+    actuals = {name: series(name) for name in config.VARIABLES}
+    cpi = actuals["cpi"]
 
     # Evaluation: main test and rolling origin.
     _, main = ev.forecast_from(cpi, config.TRAIN_END)

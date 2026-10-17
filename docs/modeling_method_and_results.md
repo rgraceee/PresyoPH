@@ -22,7 +22,7 @@ This document describes how the CPI forecasting models were built, evaluated, an
 
 | Item | Value |
 |---|---|
-| Source | PSA OpenSTAT exports in `datasets/raw/` (CPI_1–3.xlsx, Inflation_1–2.xlsx, PurchasingPower.xlsx) |
+| Source | `presyoph_db` MySQL database, built by `data_pipeline/` from the PSA OpenSTAT exports in `datasets/raw/` (CPI_1–3.xlsx, Inflation_1–2.xlsx, PurchasingPower.xlsx) |
 | Series | PHILIPPINES, 0 – ALL ITEMS, CPI 2018 = 100 |
 | Period | January 2018 – August 2026, 104 monthly observations, no missing values |
 | Unreleased months | September–December 2026 are marked ".." by PSA and excluded, not imputed |
@@ -179,20 +179,21 @@ All 12 months are in `datasets/outputs/forecasts.csv`.
 3. **Limited evaluation data.** Six forecast periods (72 months, overlapping) is a modest sample. Linear Regression did better at the three most recent origins, so the ranking could change as new data arrives.
 4. **Approximate intervals.** ARIMA's residuals are slightly non-normal; Linear Regression's interval does not widen with the horizon; Moving Average's interval lies entirely above its forecast at longer steps because the method has always under-forecast a rising CPI.
 5. **Inflation MAPE is unstable** when inflation is low and should not be used on its own.
-6. **Temporary data loading.** Until Member 1's database is ready, data is read directly from the raw PSA exports by `modeling/temp_loader.py`.
 
 ## 9. Reproducing the results
+
+Set up the `presyoph_db` database first (see the README) and keep MySQL running.
 
 ```
 .venv/Scripts/python -m pip install -r requirements.txt
 .venv/Scripts/python -m modeling.run_pipeline        # writes datasets/outputs/
-.venv/Scripts/python -m pytest                       # 35 backend tests
+.venv/Scripts/python -m pytest                       # backend and dashboard tests
 ```
 
 | File | Purpose |
 |---|---|
 | `modeling/config.py` | Split, horizon, rolling origins, tuning grids, selection rule |
-| `modeling/temp_loader.py` | Reads the raw PSA exports (temporary) |
+| `backend/sources.py` | Loads the series from `presyoph_db` |
 | `modeling/derive.py` | Inflation and purchasing power from CPI |
 | `modeling/models.py` | The four models |
 | `modeling/evaluation.py` | Metrics, selection rule, rolling origin |
