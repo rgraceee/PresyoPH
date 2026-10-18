@@ -32,7 +32,7 @@ def forecast_figure(history, forecast, variable, model, comparison=None):
     forecast: DataFrame with date, forecast, lower, upper.
     comparison: optional {model name: forecast DataFrame} drawn as thin lines.
     """
-    color = theme.INDICATOR_COLORS[variable]
+    color = theme.MODEL_COLORS.get(model, theme.MUTED_COLOR)
     hover = theme.PLOTLY_HOVER_FORMATS[variable]
     fig = go.Figure()
 
@@ -82,7 +82,10 @@ def model_comparison_figure(metrics, variable, metric="rmse"):
     """
     table = metrics.sort_values(metric, ascending=False)
     labels = [m + ("  (extra)" if not p else "") for m, p in zip(table["model"], table["in_proposal"])]
-    colors = [theme.INDICATOR_COLORS[variable] if s else theme.MUTED_COLOR for s in table["is_selected_model"]]
+    colors = [
+    theme.MODEL_COLORS.get(model, theme.MUTED_COLOR)
+    for model in table["model"]
+]
     if metric == "mape":
         text = [f"{v:.2f}%" for v in table[metric]]
     else:

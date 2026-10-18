@@ -1,0 +1,12 @@
+# PresyoPH theme. Forces the light Figma look so the app does not switch to Streamlit's dark theme
+# when the browser or Windows is in dark mode (the Figma design has no dark variant).
+[theme]
+base = "light"
+primaryColor = "#1B5E4B"
+backgroundColor = "#F7F6EF"
+secondaryBackgroundColor = "#EFF4EC"
+textColor = "#0F3D36"
+font = "sans serif"
+
+[client]
+toolbarMode = "minimal"

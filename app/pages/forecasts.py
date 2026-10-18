@@ -1,20 +1,29 @@
-"""Screen 6: Forecasts and Model Comparison.
+"""Forecasting screen in the Figma layout: projected values, results table and
+model comparison. Everything comes from backend.data (the ARIMA pipeline's
+outputs); nothing is computed here except display changes.
 
-Built by Member 2 on top of backend/data.py; Member 3 supports the layout.
-Answers the instructor's comment to forecast inflation and purchasing power
-too: both are derived from the CPI forecast.
+The full evaluation (error measures by period, forecast vs. actual, error by
+months ahead) stays on the existing Forecasts page, linked at the bottom.
 """
 
 import pandas as pd
 import streamlit as st
 
 from app import theme
-from app.components import forecast_charts as charts
+from app.ui import charts, shell, tokens
+from app.components import forecast_charts as eval_charts
 from backend import data
 
 VARIABLES = list(theme.INDICATOR_NAMES)
 HORIZONS = [3, 6, 12]
 HISTORY_MONTHS = 36
+MODEL_BLURBS = {
+    "ARIMA": "Auto-regressive integrated moving average",
+    "Linear Regression": "Trend-based statistical regression",
+    "Moving Average": "Baseline built from recent observations",
+    "ETS": "Exponential smoothing (extra comparison only)",
+}
+
 
 # Evaluation periods offered in the model comparison, mapped to the
 # (evaluation, period) values in the backend's metrics.
@@ -36,9 +45,10 @@ METRIC_HELP = (
 )
 
 
+
+
 @st.cache_data(show_spinner=False)
 def load_page_data():
-    """Everything the page needs that does not depend on the controls."""
     info = data.get_model_info()
     latest = data.get_latest()
     main_test_winner = _rule_winner(data.get_model_metrics("cpi", "main_test", EVALUATION_OPTIONS[
@@ -47,95 +57,122 @@ def load_page_data():
 
 
 def _rule_winner(metrics):
-    """The selection rule (lowest on at least 2 of 3 metrics, else lowest
-    RMSE) among the proposal models, for explaining results in captions."""
     table = metrics[metrics["in_proposal"]].set_index("model")
     wins = pd.Series([table[m].idxmin() for m in METRIC_LABELS]).value_counts()
     return wins.index[0] if wins.iloc[0] >= 2 else table["rmse"].idxmin()
 
 
-def kpi_cards(variable, horizon, forecast, latest, final_model):
-    current = latest[variable]
-    first, last = forecast.iloc[0], forecast.iloc[-1]
-    step_error = data.get_error_by_step(variable, model=final_model)
-    typical_error = step_error.loc[step_error["step"] == horizon, "mae"].iloc[0]
-
-    cols = st.columns(4)
-    cols[0].metric(
-        f"Latest actual ({current['date']:%b %Y})",
-        theme.format_value(variable, current["value"]),
-        border=True, height="stretch",
-    )
-    cols[1].metric(
-        f"Next month ({first['date']:%b %Y})",
-        theme.format_value(variable, first["forecast"]),
-        delta=theme.format_value(variable, first["forecast"] - current["value"]).replace("₱-", "-₱"),
-        delta_color="off",
-        help=f"95% range: {theme.format_value(variable, first['lower'])} to {theme.format_value(variable, first['upper'])}",
-        border=True, height="stretch",
-    )
-    cols[2].metric(
-        f"In {horizon} months ({last['date']:%b %Y})",
-        theme.format_value(variable, last["forecast"]),
-        help=f"95% range: {theme.format_value(variable, last['lower'])} to {theme.format_value(variable, last['upper'])}",
-        border=True, height="stretch",
-    )
-    cols[3].metric(
-        f"Typical error {horizon} months ahead",
-        "± " + theme.format_error(variable, typical_error),
-        help=(f"How far {final_model}'s forecasts were from the actual values, on average, "
-              f"{horizon} months ahead, across six past test periods."),
-        border=True, height="stretch",
-    )
+def _change_text(variable, diff, base):
+    """Inflation is already a percentage, so its change is in points; the others are % of the base."""
+    if variable == "inflation":
+        return f"{abs(diff):.1f} pts"
+    return f"{abs(diff / base * 100):.1f}%"
 
 
-def forecast_section(variable, horizon, final_model, show_other_models):
-    forecast = data.get_forecast(variable, horizon)
-    first_month = forecast["date"].iloc[0]
-    history_start = first_month - pd.DateOffset(months=HISTORY_MONTHS)
-    history = data.get_series(variable, start=history_start)
-
+def chart_card(variable, horizon, forecast, final_model, show_other):
+    history = data.get_series(variable, start=forecast["date"].iloc[0] - pd.DateOffset(months=HISTORY_MONTHS))
     comparison = None
-    if show_other_models:
+    if show_other:
         others = [m for m in data.get_model_metrics(variable)["model"] if m != final_model]
         comparison = {m: data.get_forecast(variable, horizon, model=m) for m in others}
-
+    shell.panel_header(f"Historical vs. Forecast: {theme.INDICATOR_SHORT_NAMES[variable]}",
+                       f"Historical observations with a {horizon}-month projected outlook", right=f"{final_model} model",
+                       icon="trend")
     st.plotly_chart(charts.forecast_figure(history, forecast, variable, final_model, comparison),
                     config={"displayModeBar": False})
-
     if variable == "inflation" and (forecast["date"] >= pd.Timestamp("2027-04-01")).any():
-        st.info(
-            "**Why inflation drops in April 2027:** prices jumped in March–April 2026. From April 2027, "
-            "prices are compared with that already-high level, so the year-on-year rate falls even though "
-            "prices are still forecast to rise. This is called a *base effect*.",
-            icon=":material/info:",
-        )
+        st.info("**Why inflation drops in April 2027:** prices jumped in March–April 2026. From April 2027, prices are "
+                "compared with that already-high level, so the year-on-year rate falls even though prices are still "
+                "forecast to rise (a *base effect*).", icon=":material/info:")
     if variable != "cpi":
-        st.caption(
-            f"Only CPI is forecast by the model. The {theme.INDICATOR_NAMES[variable].lower()} forecast is "
-            "calculated from the CPI forecast using PSA's formula, so the forecasts always agree with each other."
-        )
+        st.caption(f"Only CPI is forecast by the model. The {theme.INDICATOR_NAMES[variable].lower()} forecast is "
+                   "calculated from the CPI forecast using PSA's formula, so the forecasts always agree with each other.")
 
-    with st.expander("Forecast table"):
-        table = forecast.rename(columns={"date": "Month", "forecast": "Forecast",
-                                         "lower": "Lower (95%)", "upper": "Upper (95%)"})
-        fmt = theme.VALUE_FORMATS[variable]
-        st.dataframe(
-            table.drop(columns="step"),
-            hide_index=True,
-            column_config={
-                "Month": st.column_config.DateColumn(format="MMM YYYY"),
-                "Forecast": st.column_config.NumberColumn(format=fmt),
-                "Lower (95%)": st.column_config.NumberColumn(format=fmt),
-                "Upper (95%)": st.column_config.NumberColumn(format=fmt),
-            },
-        )
-        st.download_button(
-            "Download forecast (CSV)",
-            forecast.assign(variable=variable, model=final_model).to_csv(index=False),
-            file_name=f"presyoph_{variable}_forecast_{horizon}m.csv",
-            mime="text/csv",
-        )
+
+def results_card(variable, horizon, forecast, latest, final_model):
+    """One row per forecast month with its 95% range and change from the previous period."""
+    previous = latest[variable]["value"]
+    rows = []
+    for i, r in enumerate(forecast.itertuples()):
+        diff = r.forecast - previous
+        worse = diff < 0 if variable == "purchasing_power" else diff > 0
+        rows.append(
+            f'<tr><td>{r.date:%b %Y}<small>{"Next period" if i == 0 else f"Month {i + 1}"}</small></td>'
+            f'<td class="num">{theme.format_value(variable, r.forecast)}</td>'
+            f'<td class="num">{theme.format_value(variable, r.lower)} to {theme.format_value(variable, r.upper)}</td>'
+            f'<td class="num {"dn" if worse else "up"}">{"▲" if diff >= 0 else "▼"} {_change_text(variable, diff, previous)}</td></tr>')
+        previous = r.forecast
+    shell.panel_header("Forecast Results", "Point estimates and 95% prediction range", right=f"{len(forecast)} periods", icon="file")
+    st.markdown('<table class="pp-tbl"><tr><th>Period</th><th class="num">Forecast</th><th class="num">Range</th>'
+                f'<th class="num">Change</th></tr>{"".join(rows)}</table>', unsafe_allow_html=True)
+    st.download_button("Download forecast (CSV)", forecast.assign(variable=variable, model=final_model).to_csv(index=False),
+                       file_name=f"presyoph_{variable}_forecast_{horizon}m.csv", mime="text/csv", key="fc_download")
+
+
+def model_table_card(variable):
+    """MAE, RMSE, MAPE per model from the pooled evaluation that the selection rule used."""
+    metrics = data.get_model_metrics(variable)
+    metrics = metrics[metrics["in_proposal"]].sort_values("rmse")
+    best_rmse = metrics["rmse"].min()
+    rows = []
+    for r in metrics.itertuples():
+        best = r.is_selected_model
+        chip = '<span class="pp-badge-best">BEST MODEL</span>' if best else ""
+        color = tokens.RANK_COLORS[0] if best else "#E9AA2B"
+        rows.append(
+            f'<tr class="{"sel" if best else ""}"><td><b>{shell.esc(r.model)}</b>{chip}'
+            f'<small>{shell.esc(MODEL_BLURBS.get(r.model, ""))}</small></td>'
+            f'<td class="num">{r.mae:.3f}</td><td class="num">{r.rmse:.3f}</td><td class="num">{r.mape:.2f}%</td>'
+            f'<td style="width:32%"><div class="pp-bar"><i style="width:{best_rmse / r.rmse * 100:.0f}%;background:{color}"></i></div></td></tr>')
+    shell.panel_header("Forecast Model Comparison",
+                       f"Accuracy for {theme.INDICATOR_SHORT_NAMES[variable]} across all six evaluation periods", right="Lower error is better")
+    st.markdown('<table class="pp-tbl"><tr><th>Forecast model</th><th class="num">MAE</th><th class="num">RMSE</th>'
+                f'<th class="num">MAPE</th><th>Performance (relative RMSE)</th></tr>{"".join(rows)}</table>', unsafe_allow_html=True)
+    if variable == "inflation":
+        st.caption("MAPE is unreliable for inflation when the rate is low; rely on MAE and RMSE.")
+
+
+def main():
+    with st.spinner("Loading data…"):
+        info, latest, main_test_winner = load_page_data()
+    final_model = info["final_model"]
+    shell.page_header("Cost-of-Living Forecasting and Model Comparison",
+                      "Explore projected movements and compare forecasting model performance.",
+                      shell.chip(f"{pd.Timestamp(info['generated_at']):%B} {pd.Timestamp(info['generated_at']).day}, "
+                                 f"{pd.Timestamp(info['generated_at']).year}", icon="calendar", boxed=True, sub="Forecast generated"))
+
+    with st.container(key="filter_fc"):
+        c1, c2, c3, c4 = st.columns([2.2, 2.2, 1.3, 1.6], vertical_alignment="center")
+        variable = c1.segmented_control("Forecast indicator", VARIABLES, default="cpi",
+                                        format_func=theme.INDICATOR_SHORT_NAMES.get, required=True)
+        horizon = c2.segmented_control("Forecast horizon", HORIZONS, default=6,
+                                       format_func=lambda h: f"{h} months", required=True)
+        show_other = c3.toggle("Show other models", help="Add the models that were not selected to the chart.")
+        forecast = data.get_forecast(variable, horizon)
+        diff = forecast["forecast"].iloc[-1] - latest[variable]["value"]
+        worse = diff < 0 if variable == "purchasing_power" else diff > 0
+        with c4:
+            shell.filter_stat(f"Projected {horizon}-Month Change", f"{'▲' if diff >= 0 else '▼'} {_change_text(variable, diff, latest[variable]['value'])}",
+                              f"{theme.INDICATOR_SHORT_NAMES[variable]} forecast, {final_model}", tone="dn" if worse else "up")
+
+    left, right = st.columns([2.1, 1])
+    with left:
+        with st.container(key="card_fc_chart"):
+            chart_card(variable, horizon, forecast, final_model, show_other)
+        with st.container(key="card_fc_models"):
+            model_table_card(variable)
+    with right:
+        with st.container(key="card_fc_results"):
+            results_card(variable, horizon, forecast, latest, final_model)
+        with st.container(key="insight_fc"):
+            shell.insight_card("Forecast Disclaimer", [("Estimates only", tokens.FORECAST_DISCLAIMER)], icon="info")
+
+    st.divider()
+    with st.container(key="full_model_evaluation"):
+        shell.page_header("Full Model Evaluation", "Review accuracy by evaluation period, compare forecasts with actual values, and inspect errors by forecast horizon.")
+        comparison_section(variable, info, main_test_winner, show_other)
+        method_notes(info, main_test_winner)
+        disclaimer()
 
 
 def comparison_section(variable, info, main_test_winner, show_other_models):
@@ -157,7 +194,7 @@ def comparison_section(variable, info, main_test_winner, show_other_models):
         metrics = metrics[metrics["in_proposal"]]
 
     chart_col, table_col = st.columns([3, 2])
-    chart_col.plotly_chart(charts.model_comparison_figure(metrics, variable, metric),
+    chart_col.plotly_chart(eval_charts.model_comparison_figure(metrics, variable, metric),
                            config={"displayModeBar": False})
 
     table = metrics.assign(
@@ -193,15 +230,16 @@ def comparison_section(variable, info, main_test_winner, show_other_models):
     with test_tab:
         predictions = data.get_test_predictions(variable, "main_test")
         actual = data.get_series(variable, start="2024-09")
-        st.plotly_chart(charts.test_period_figure(actual, predictions, variable, models),
+        st.plotly_chart(eval_charts.test_period_figure(actual, predictions, variable, models),
                         config={"displayModeBar": False})
         st.caption("Each model forecast September 2025 – August 2026 using only data up to August 2025.")
     with step_tab:
         errors = data.get_error_by_step(variable)
-        st.plotly_chart(charts.error_by_step_figure(errors, variable, final_model, models),
+        st.plotly_chart(eval_charts.error_by_step_figure(errors, variable, final_model, models),
                         config={"displayModeBar": False})
         st.caption("Forecasts become less accurate the further ahead they go. Dotted lines mark the 3-, 6-, and "
                    "12-month views.")
+
 
 
 def method_notes(info, main_test_winner):
@@ -231,28 +269,5 @@ def disclaimer():
     )
 
 
-def render():
-    st.title("Forecasts and Model Comparison")
-    st.caption("What prices may do over the next year, and how accurate the forecasting models have been.")
 
-    with st.spinner("Loading data…"):
-        info, latest, main_test_winner = load_page_data()
-    final_model = info["final_model"]
-
-    c1, c2, c3 = st.columns([3, 2, 2], vertical_alignment="bottom")
-    variable = c1.segmented_control("Indicator", VARIABLES, default="cpi",
-                                    format_func=theme.INDICATOR_SHORT_NAMES.get, required=True)
-    horizon = c2.segmented_control("Forecast horizon", HORIZONS, default=12,
-                                   format_func=lambda h: f"{h} months", required=True)
-    show_other_models = c3.toggle("Show other models", help="Add the models that were not selected to the charts.")
-
-    forecast = data.get_forecast(variable, horizon)
-    kpi_cards(variable, horizon, forecast, latest, final_model)
-    forecast_section(variable, horizon, final_model, show_other_models)
-    st.divider()
-    comparison_section(variable, info, main_test_winner, show_other_models)
-    method_notes(info, main_test_winner)
-    disclaimer()
-
-
-render()
+main()

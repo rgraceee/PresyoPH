@@ -4,24 +4,25 @@ The colours are placeholders until Member 3's palette and chart style guide
 are ready; replace the values here and every chart picks them up.
 """
 
-# One colour per indicator (style guide: "one color per indicator").
+
+# One colour per indicator.
 INDICATOR_COLORS = {
-    "cpi": "#2563EB",
-    "inflation": "#DC2626",
-    "purchasing_power": "#059669",
+    "cpi": "#1B5E4B",
+    "inflation": "#E9AA2B",
+    "purchasing_power": "#EE7B30",
 }
 
-# One colour per model. The selected model is drawn in its indicator's colour
-# on forecast charts; these are used where models are compared.
+# One consistent colour per model across all forecast charts.
 MODEL_COLORS = {
-    "ARIMA": "#2563EB",
-    "Linear Regression": "#D97706",
-    "Moving Average": "#7C3AED",
-    "ETS": "#6B7280",
+    "ARIMA": "#1B5E4B",
+    "Linear Regression": "#E9AA2B",
+    "Moving Average": "#EE7B30",
+    "ETS": "#9CA3AF",
 }
 
-ACTUAL_COLOR = "#111827"
+ACTUAL_COLOR = "#0F3D36"
 MUTED_COLOR = "#9CA3AF"
+
 
 INDICATOR_NAMES = {
     "cpi": "Consumer Price Index",
