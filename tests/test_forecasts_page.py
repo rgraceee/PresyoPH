@@ -1,7 +1,8 @@
-"""Tests for the Forecasts and Model Comparison screen (app/pages/forecasts.py).
+"""Tests for the Forecasting screen (app/pages/forecasts.py).
 
 Uses Streamlit's AppTest to run the real page without a browser, then
 switches every control and checks that the page renders without errors.
+The page is loaded directly, so the app's default page does not matter.
 """
 
 from pathlib import Path
@@ -14,13 +15,13 @@ from app import theme
 from app.components import forecast_charts as charts
 from backend import data
 
-APP = str(Path(__file__).resolve().parents[1] / "app" / "streamlit_app.py")
+PAGE = str(Path(__file__).resolve().parents[1] / "app" / "pages" / "forecasts.py")
 TIMEOUT = 120  # the first run reads the raw Excel files
 
 
 @pytest.fixture(scope="module")
 def app():
-    at = AppTest.from_file(APP, default_timeout=TIMEOUT)
+    at = AppTest.from_file(PAGE, default_timeout=TIMEOUT)
     at.run()
     assert not at.exception, at.exception
     return at
@@ -31,21 +32,26 @@ def _control(at, label, kind="segmented_control"):
     return next(w for w in widgets if w.label == label)
 
 
+def _html(at):
+    """All the page's HTML blocks; the screen draws its headers and stats with st.markdown."""
+    return "\n".join(m.value for m in at.markdown)
+
+
 def test_page_renders_with_defaults(app):
-    assert app.title[0].value == "Forecasts and Model Comparison"
-    labels = [m.label for m in app.metric]
-    assert labels[0].startswith("Latest actual")
-    assert len(app.metric) == 4
+    html = _html(app)
+    assert "Cost-of-Living Forecasting and Model Comparison" in html
+    assert "Full Model Evaluation" in html
+    assert "Projected 6-Month Change" in html  # default horizon is 6 months
 
 
 @pytest.mark.parametrize("variable", list(theme.INDICATOR_NAMES))
 @pytest.mark.parametrize("horizon", [3, 6, 12])
 def test_every_indicator_and_horizon(app, variable, horizon):
-    _control(app, "Indicator", "button_group").set_value(variable)
+    _control(app, "Forecast indicator", "button_group").set_value(variable)
     _control(app, "Forecast horizon", "button_group").set_value(horizon)
     app.run()
     assert not app.exception, app.exception
-    assert app.metric[2].label.startswith(f"In {horizon} months")
+    assert f"Projected {horizon}-Month Change" in _html(app)
 
 
 def test_every_evaluation_period_and_metric(app):
@@ -77,13 +83,13 @@ def test_forecast_figure_has_history_forecast_and_band():
     assert pd.Timestamp(forecast_trace.x[0]) == history["date"].iloc[-1]
 
 
-def test_model_comparison_highlights_selected_model():
+def test_model_comparison_colours_each_model():
     metrics = data.get_model_metrics("cpi")
     fig = charts.model_comparison_figure(metrics, "cpi", "rmse")
     bar = fig.data[0]
     selected_label = next(l for l in bar.y if l.startswith(data.get_final_model()))
     index = list(bar.y).index(selected_label)
-    assert bar.marker.color[index] == theme.INDICATOR_COLORS["cpi"]
+    assert bar.marker.color[index] == theme.MODEL_COLORS[data.get_final_model()]
     # Lowest error is drawn at the top (last bar in a horizontal chart).
     assert bar.x[-1] == min(bar.x)
 

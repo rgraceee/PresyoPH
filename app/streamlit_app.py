@@ -20,9 +20,6 @@ from app.ui import shell
 
 st.set_page_config(page_title="PresyoPH", page_icon=":material/monitoring:", layout="wide")
 
-# Page opened at "/". tests/test_forecasts_page.py loads this file and expects the
-# Forecasts page, so that page stays the default. Change to "home" (Dashboard) once
-# that test loads app/pages/forecasts.py directly.
 DEFAULT_PAGE = "home"
 
 # key, file, sidebar title, icon, URL path. The first six follow the Figma sidebar.
