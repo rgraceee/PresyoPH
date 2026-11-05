@@ -39,12 +39,14 @@ def render():
 
     months = month_options("cpi")
     with st.container(key="filter_trends"):
-        c0, c1, c2 = st.columns([1.2, 2.2, 1.6], vertical_alignment="center")
+        c0, c1, c2, c3 = st.columns([1.2, 1.6, 1.1, 1.1], vertical_alignment="center")
         with c0:
             shell.filter_title("Analysis Filters", "Refine the trend data shown below")
-        start, end = c1.select_slider("Date Period", options=months, value=(months[0], months[-1]),
-                                      format_func=month_label, key="trend_range")
-        area = c2.selectbox("Region", area_options(), format_func=area_label, key="trend_area")
+        area = c1.selectbox("Region", area_options(), format_func=area_label, key="trend_area")
+        start = c2.selectbox("Start Date", months, index=0, format_func=month_label, key="trend_start")
+        # Only months on or after the start date, so the range can't be reversed.
+        end_months = [m for m in months if m >= start]
+        end = c3.selectbox("End Date", end_months, index=len(end_months) - 1, format_func=month_label, key="trend_end")
 
     cpi = data.get_series("cpi", start, end, area)
     inflation = data.get_series("inflation", start, end, area)

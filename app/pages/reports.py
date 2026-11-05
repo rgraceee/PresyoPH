@@ -65,10 +65,10 @@ def household_purchasing_power(month, area):
     fies = data.get_fies_by_decile(area if area in data.list_areas("region") else data.NATIONAL)
     groups = fies[fies["decile"] != "All Income Groups"]
     findings = [f"Purchasing power of the peso was {now:.2f} in {month_label(month)}, {now - then:+.2f} over the past 12 months.",
-                f"FIES 2023: the lowest-income tenth saved {groups.iloc[0]['savings_rate']:.1f}% of income and the highest-income "
-                f"tenth {groups.iloc[-1]['savings_rate']:.1f}%. FIES is a 2023 snapshot, not a trend."]
+                f"FIES 2023: the bottom 10% of earners saved {groups.iloc[0]['savings_rate']:.1f}% of income and the top "
+                f"10% {groups.iloc[-1]['savings_rate']:.1f}%. FIES is a 2023 snapshot, not a trend."]
     table = fies.assign(decile=fies["decile"].map(tokens.DECILE_SHORT))[["decile", "income", "expenditure", "savings", "savings_rate"]]
-    table.columns = ["Income group", "Income (thousand pesos)", "Expenditure (thousand pesos)", "Savings (thousand pesos)", "Savings rate (%)"]
+    table.columns = ["Income level", "Income (thousand pesos)", "Expenditure (thousand pesos)", "Savings (thousand pesos)", "Savings rate (%)"]
     return findings, table
 
 

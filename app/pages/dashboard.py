@@ -59,9 +59,9 @@ def price_trend_card(labels):
 def savings_card():
     with st.container(key="card_savings"):
         shell.panel_header("Savings by Household Income Group",
-                           "Share of income saved, FIES 2023 (lowest to highest income)", icon="house")
+                           "Share of income saved, FIES 2023 (bottom 10% to top 10% of earners)", icon="house")
         groups = data.get_fies_by_decile().query("decile != 'All Income Groups'")
-        labels = [tokens.DECILE_SHORT[d].split(" ")[0] for d in groups["decile"]]
+        labels = [tokens.DECILE_SHORT[d] for d in groups["decile"]]
         st.plotly_chart(charts.banded_column_figure(labels, groups["savings_rate"], suffix="%", height=300),
                         config={"displayModeBar": False})
 

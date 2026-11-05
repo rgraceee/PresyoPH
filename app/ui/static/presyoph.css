@@ -348,6 +348,9 @@ div[data-testid="stAlert"] { border-radius: 12px; }
 .st-key-card_savings, .st-key-card_trend { min-height: 330px; }
 .st-key-insight_fc { min-height: 190px; }
 .st-key-card_reg_rank, .st-key-card_reg_table { min-height: 560px; }
+/* Purchasing Power: the right column's height depends on the insight text, so the trend card stretches to match it */
+[data-testid="stLayoutWrapper"]:has(> .st-key-card_pp_trend) { flex-grow: 1; }
+.st-key-card_pp_trend { height: 100%; }
 
 /* charts: transparent on the card, no default Plotly white box */
 [data-testid="stPlotlyChart"] { background: transparent; }

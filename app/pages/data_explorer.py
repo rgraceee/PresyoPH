@@ -29,8 +29,8 @@ def price_table(indicator):
 def fies_table():
     areas = st.multiselect("Areas", [data.NATIONAL] + data.list_areas("region"), default=[data.NATIONAL],
                            format_func=area_label)
-    groups = st.multiselect("Income groups", list(tokens.DECILE_SHORT), default=list(tokens.DECILE_SHORT),
-                            format_func=tokens.DECILE_SHORT.get)
+    groups = st.multiselect("Income levels", list(tokens.DECILE_SHORT), default=list(tokens.DECILE_SHORT),
+                            format_func=tokens.DECILE_LONG.get)
     st.info(tokens.FIES_NOTE, icon=":material/info:")
     table = data.get_fies(areas=areas or None, deciles=groups or None)
     return table.drop(columns=["area_level"]).rename(columns={

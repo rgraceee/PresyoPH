@@ -63,23 +63,24 @@ def render():
             shell.filter_stat("Current Category Index", f"{series['value'].iloc[-1]:.1f}",
                               f"{'▲' if change >= 0 else '▼'} {abs(change):.1f}% vs. start of period", tone="dn" if change > 0 else "up")
 
-    main, side = st.columns([1.5, 1])
-    with main:
-        with st.container(key="card_cat_trend"):
-            shell.panel_header("Category Price Trend", f"Price index movement for {label.lower()}", right=period)
-            st.plotly_chart(category_trend_figure(series, average, label), config={"displayModeBar": False})
-    with side:
-        show_all = st.toggle("Show all 13 categories", key="cat_all",
-                             help="The Figma design lists six; PSA publishes thirteen commodity groups.")
-        ranking = data.get_category_comparison("cpi")
-        if not show_all:
-            top = ranking.head(6)
-            ranking_view = top if label in set(top["label"]) else ranking[ranking["label"].isin(set(top["label"]) | {label})]
-        else:
-            ranking_view = ranking
+    with st.container(key="card_cat_trend"):
+        shell.panel_header("Category Price Trend", f"Price index movement for {label.lower()}", right=period)
+        st.plotly_chart(category_trend_figure(series, average, label), config={"displayModeBar": False})
+
+    show_all = st.toggle("Show all 13 categories", key="cat_all",
+                         help="The Figma design lists six; PSA publishes thirteen commodity groups.")
+    ranking = data.get_category_comparison("cpi")
+    if not show_all:
+        top = ranking.head(6)
+        ranking_view = top if label in set(top["label"]) else ranking[ranking["label"].isin(set(top["label"]) | {label})]
+    else:
+        ranking_view = ranking
+    compare, rank = st.columns(2)
+    with compare:
         with st.container(key="card_cat_compare"):
             shell.panel_header("Category Comparison", f"Current index, {month_label(ranking.attrs['date'])}", right="Price index")
             comparison_bars(ranking_view, label)
+    with rank:
         changes = queries.get_category_changes(max(1, len(series) - 1))
         with st.container(key="card_cat_rank"):
             shell.panel_header("Fastest-Rising Categories", "Ranked by change in the selected period", right="Change")

@@ -28,7 +28,7 @@ def render():
 - **Inflation rate:** the percentage change in prices compared with the same month a year earlier.
 - **Purchasing power of the peso:** how much a peso can buy compared with the base year; it falls as prices rise.
 - **FIES:** PSA's survey of how much Filipino families earn, spend, and save.
-- **Income group (decile):** families ranked by income and split into ten equal groups, from the lowest-income tenth to the highest.
+- **Income level (e.g. "Bottom 10%", "10–20%"):** families are ranked by income and split into ten equal groups (PSA calls these deciles). "Bottom 10%" is the lowest-earning tenth of families, "10–20%" the next tenth, up to the "Top 10%".
 - **MAE, RMSE, MAPE:** forecast error measures; lower is better. MAPE is unreliable for inflation when inflation is near zero.
 """)
 

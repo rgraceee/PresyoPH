@@ -22,7 +22,7 @@ def trend_figure(series, label):
                              fillcolor="rgba(233,170,43,0.10)", hovertemplate="%{y:.2f}<extra>" + label + "</extra>"))
     fig.add_hline(y=1.0, line_dash="dot", line_color="#9CA3AF", annotation_text="2018 purchasing power (₱1.00)",
                   annotation_position="top right")
-    fig.update_layout(**LAYOUT, height=330, showlegend=False,
+    fig.update_layout(**LAYOUT, height=355, showlegend=False,
                       yaxis=dict(title="Purchasing power (2018 = ₱1.00)", range=[max(0, series["value"].min() * 0.85), 1.1],
                                  gridcolor="#e8e8de"))
     return fig
@@ -33,6 +33,7 @@ def group_bars(groups, selected):
     fig = charts.grouped_bar_figure(labels, {MEASURES[m]: groups[m] for m in MEASURES},
                                     {MEASURES[m]: tokens.FIES_COLORS[m] for m in MEASURES}, y_title="Thousand pesos per family",
                                     height=360)
+    fig.update_xaxes(title=tokens.INCOME_RANK_AXIS)
     if selected in set(groups["decile"]):
         fig.add_vrect(x0=list(groups["decile"]).index(selected) - 0.5, x1=list(groups["decile"]).index(selected) + 0.5,
                       fillcolor="rgba(27,94,75,0.08)", line_width=0)
@@ -48,13 +49,14 @@ def render():
     fies_groups = [d for d in tokens.DECILE_SHORT]
     with st.container(key="filter_pp"):
         c1, c2, c3, c4 = st.columns([1.4, 1.3, 1.2, 1.5], vertical_alignment="center")
-        group = c1.selectbox("Income Group", fies_groups, format_func=lambda d: "All income groups" if d == "All Income Groups"
-                             else tokens.DECILE_SHORT[d] + " decile", key="pp_group")
+        group = c1.selectbox("Income Level", fies_groups, format_func=tokens.DECILE_LONG.get, key="pp_group",
+                             help="Families are ranked by income and split into ten equal groups. "
+                                  "\"10–20%\" is the second-lowest group.")
         area = c2.selectbox("Area", areas, format_func=area_label, key="pp_area_sel")
         view = c3.segmented_control("Comparison View", ["Monthly", "Annual"], default="Monthly", required=True, key="pp_view")
         with c4:
-            shell.filter_stat("Selected household segment", "All incomes" if group == "All Income Groups" else tokens.DECILE_SHORT[group],
-                              "FIES 2023 income group", tone="sm")
+            shell.filter_stat("Selected household segment", tokens.DECILE_SHORT[group],
+                              "FIES 2023 income level", tone="sm")
 
     series = data.get_purchasing_power(area=area)
     if view == "Annual":
@@ -77,31 +79,31 @@ def render():
     row = fies[fies["decile"] == group].iloc[0]
     overall = fies[fies["decile"] == "All Income Groups"].iloc[0]
     with side:
-        st.markdown(f"**Household Snapshot**  \nFIES 2023 · {'All income groups' if group == 'All Income Groups' else tokens.DECILE_SHORT[group] + ' decile'}")
+        st.markdown(f"**Household Snapshot**  \nFIES 2023 · {tokens.DECILE_LONG[group]}")
         shell.mini_card("Household Income", f"₱{row['income']:,.1f}k", "thousand pesos", "per family", tone="green")
         shell.mini_card("Household Expenditure", f"₱{row['expenditure']:,.1f}k", "thousand pesos", "per family", tone="gold")
         shell.mini_card("Household Savings", f"₱{row['savings']:,.1f}k", f"{row['savings_rate']:.1f}% of income", "per family", tone="green")
-
-    main, side = st.columns([2.5, 1])
-    with main:
-        with st.container(key="card_pp_groups"):
-            shell.panel_header("Income, Expenditure and Savings by Income Group",
-                               "Average household financial position across income groups, " + area_label(area), right="FIES 2023")
-            groups = fies[fies["decile"] != "All Income Groups"]
-            st.plotly_chart(group_bars(groups, group), config={"displayModeBar": False})
-    with side:
+        groups = fies[fies["decile"] != "All Income Groups"]
         with st.container(key="insight_pp"):
             lowest = groups.iloc[0]
             highest = groups.iloc[-1]
             if group == "All Income Groups":
-                text = (f"Across all income groups, families save {row['savings_rate']:.1f}% of their income on average. "
-                        f"The lowest-income tenth saves {lowest['savings_rate']:.1f}% and the highest-income tenth "
+                text = (f"Across all families, {row['savings_rate']:.1f}% of income is saved on average. "
+                        f"The bottom 10% of earners save {lowest['savings_rate']:.1f}% and the top 10% "
                         f"{highest['savings_rate']:.1f}%.")
             else:
-                text = (f"The {tokens.DECILE_SHORT[group]} income group keeps {row['savings_rate']:.1f}% of income after "
+                who = (tokens.DECILE_SHORT[group].lower() if group in ("First Decile", "Tenth Decile")
+                       else tokens.DECILE_SHORT[group] + " income group")
+                text = (f"Families in the {who} keep {row['savings_rate']:.1f}% of income after "
                         f"spending (₱{row['savings']:,.1f}k of ₱{row['income']:,.1f}k), compared with "
                         f"{overall['savings_rate']:.1f}% for all families.")
             shell.insight_card("Financial Insight", [("Savings after spending", text)])
+
+    with st.container(key="card_pp_groups"):
+        shell.panel_header("Income, Spending and Savings from Lowest to Highest Earners",
+                           "Average per family, " + area_label(area) + ". Families are ranked by income and split "
+                           "into 10 equal groups.", right="FIES 2023")
+        st.plotly_chart(group_bars(groups, group), config={"displayModeBar": False})
     st.info(tokens.FIES_NOTE, icon=":material/info:")
 
 

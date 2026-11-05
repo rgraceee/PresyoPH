@@ -21,24 +21,29 @@ RANK_COLORS = ["#1B5E4B", "#6FA06B", "#E9AA2B", "#EE7B30", "#D94B3D"]
 
 HIGHLIGHT_COLOR = "#D94B3D"
 
+# FIES deciles named by where families rank by income, e.g. "10–20%" is the second-lowest tenth.
 DECILE_SHORT = {
-    "All Income Groups": "All",
-    "First Decile": "1st (lowest)",
-    "Second Decile": "2nd",
-    "Third Decile": "3rd",
-    "Fourth Decile": "4th",
-    "Fifth Decile": "5th",
-    "Sixth Decile": "6th",
-    "Seventh Decile": "7th",
-    "Eighth Decile": "8th",
-    "Ninth Decile": "9th",
-    "Tenth Decile": "10th (highest)",
+    "All Income Groups": "All families",
+    "First Decile": "Bottom 10%",
+    "Second Decile": "10–20%",
+    "Third Decile": "20–30%",
+    "Fourth Decile": "30–40%",
+    "Fifth Decile": "40–50%",
+    "Sixth Decile": "50–60%",
+    "Seventh Decile": "60–70%",
+    "Eighth Decile": "70–80%",
+    "Ninth Decile": "80–90%",
+    "Tenth Decile": "Top 10%",
 }
+# Longer form for dropdowns and headings, where there is room to say which end is which.
+DECILE_LONG = {**DECILE_SHORT, "First Decile": "Bottom 10% (lowest income)", "Tenth Decile": "Top 10% (highest income)"}
+INCOME_RANK_AXIS = "Families ranked by income (lowest → highest)"
 
 FIES_NOTE = (
     "**FIES is a 2023 snapshot.** The Family Income and Expenditure Survey is not a monthly series, so these "
     "figures show how families of different income levels compare in 2023. They are not trends and are not "
-    "forecast. Each income group (decile) is one tenth of families, from the lowest-income tenth to the highest."
+    "forecast. Families are ranked by income and split into ten equal groups, from the bottom 10% of earners to "
+    "the top 10%."
 )
 
 PSA_ATTRIBUTION = "Source: Philippine Statistics Authority (PSA), OpenSTAT, via statistics.bettergov.ph."
