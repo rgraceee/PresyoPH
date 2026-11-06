@@ -150,9 +150,6 @@ def render():
                 c[4].download_button("Download", r["markdown"], file_name=f"presyoph_{r['id']}.md", mime="text/markdown",
                                      key=f"dl_{r['id']}", type="primary")
     with right:
-        with st.container(key="insight_reports"):
-            shell.insight_card("About PresyoPH Reports", [("", "Reports are based on available PSA cost-of-living, household, and "
-                                                           "purchasing power data. Coverage may vary by period and region.")], icon="ⓘ")
         with st.container(key="card_report_detail"):
             shell.panel_header("Report Details")
             chosen = next((r for r in reports if r["id"] == st.session_state.get("rep_selected")), None)

@@ -10,8 +10,7 @@ import pandas as pd
 import streamlit as st
 
 from app import theme
-from app.ui import charts, shell, tokens
-from app.components import forecast_charts as eval_charts
+from app.ui import charts, shell
 from backend import data
 
 VARIABLES = list(theme.INDICATOR_NAMES)
@@ -109,29 +108,6 @@ def results_card(variable, horizon, forecast, latest, final_model):
                        file_name=f"presyoph_{variable}_forecast_{horizon}m.csv", mime="text/csv", key="fc_download")
 
 
-def model_table_card(variable):
-    """MAE, RMSE, MAPE per model from the pooled evaluation that the selection rule used."""
-    metrics = data.get_model_metrics(variable)
-    metrics = metrics[metrics["in_proposal"]].sort_values("rmse")
-    best_rmse = metrics["rmse"].min()
-    rows = []
-    for r in metrics.itertuples():
-        best = r.is_selected_model
-        chip = '<span class="pp-badge-best">BEST MODEL</span>' if best else ""
-        color = tokens.RANK_COLORS[0] if best else "#E9AA2B"
-        rows.append(
-            f'<tr class="{"sel" if best else ""}"><td><b>{shell.esc(r.model)}</b>{chip}'
-            f'<small>{shell.esc(MODEL_BLURBS.get(r.model, ""))}</small></td>'
-            f'<td class="num">{r.mae:.3f}</td><td class="num">{r.rmse:.3f}</td><td class="num">{r.mape:.2f}%</td>'
-            f'<td style="width:32%"><div class="pp-bar"><i style="width:{best_rmse / r.rmse * 100:.0f}%;background:{color}"></i></div></td></tr>')
-    shell.panel_header("Forecast Model Comparison",
-                       f"Accuracy for {theme.INDICATOR_SHORT_NAMES[variable]} across all six evaluation periods", right="Lower error is better")
-    st.markdown('<table class="pp-tbl"><tr><th>Forecast model</th><th class="num">MAE</th><th class="num">RMSE</th>'
-                f'<th class="num">MAPE</th><th>Performance (relative RMSE)</th></tr>{"".join(rows)}</table>', unsafe_allow_html=True)
-    if variable == "inflation":
-        st.caption("MAPE is unreliable for inflation when the rate is low; rely on MAE and RMSE.")
-
-
 def main():
     with st.spinner("Loading data…"):
         info, latest, main_test_winner = load_page_data()
@@ -159,115 +135,9 @@ def main():
     with left:
         with st.container(key="card_fc_chart"):
             chart_card(variable, horizon, forecast, final_model, show_other)
-        with st.container(key="card_fc_models"):
-            model_table_card(variable)
     with right:
         with st.container(key="card_fc_results"):
             results_card(variable, horizon, forecast, latest, final_model)
-        with st.container(key="insight_fc"):
-            shell.insight_card("Forecast Disclaimer", [("Estimates only", tokens.FORECAST_DISCLAIMER)], icon="info")
-
-    st.divider()
-    with st.container(key="full_model_evaluation"):
-        shell.page_header("Full Model Evaluation", "Review accuracy by evaluation period, compare forecasts with actual values, and inspect errors by forecast horizon.")
-        comparison_section(variable, info, main_test_winner, show_other)
-        method_notes(info, main_test_winner)
-        disclaimer()
-
-
-def comparison_section(variable, info, main_test_winner, show_other_models):
-    final_model = info["final_model"]
-    st.subheader("How accurate were the models?")
-    st.markdown(
-        f"Each model forecast CPI 12 months ahead from six different points in the past, and the forecasts "
-        f"were compared with what actually happened. **{final_model}** was chosen because it was the most "
-        f"accurate overall. {METRIC_HELP}"
-    )
-
-    left, right = st.columns([3, 2])
-    period_label = left.selectbox("Evaluation period", list(EVALUATION_OPTIONS))
-    metric = right.segmented_control("Error measure", list(METRIC_LABELS), default="rmse",
-                                     format_func=METRIC_LABELS.get, required=True)
-    evaluation, period = EVALUATION_OPTIONS[period_label]
-    metrics = data.get_model_metrics(variable, evaluation, period)
-    if not show_other_models:
-        metrics = metrics[metrics["in_proposal"]]
-
-    chart_col, table_col = st.columns([3, 2])
-    chart_col.plotly_chart(eval_charts.model_comparison_figure(metrics, variable, metric),
-                           config={"displayModeBar": False})
-
-    table = metrics.assign(
-        Model=[m + ("" if p else " (extra)") + (" ✓ selected" if s else "")
-               for m, p, s in zip(metrics["model"], metrics["in_proposal"], metrics["is_selected_model"])]
-    ).sort_values(metric)
-    table_col.dataframe(
-        table[["Model", "mae", "rmse", "mape"]],
-        hide_index=True,
-        column_config={
-            "mae": st.column_config.NumberColumn("MAE", format="%.3f"),
-            "rmse": st.column_config.NumberColumn("RMSE", format="%.3f"),
-            "mape": st.column_config.NumberColumn("MAPE", format="%.2f%%"),
-        },
-    )
-
-    if variable == "inflation" and metric == "mape":
-        st.warning(
-            "MAPE is unreliable for inflation: when inflation is low (around 1%), even a small miss becomes a "
-            "large percentage. Compare models using MAE or RMSE instead.",
-            icon=":material/warning:",
-        )
-    if evaluation == "main_test" and period and period.startswith("full") and main_test_winner != final_model:
-        st.caption(
-            f"On this period alone {main_test_winner} has the lowest error, largely because of a sudden price "
-            f"jump in March–April 2026. Across all six evaluation periods, {final_model} is the most accurate, "
-            "which is why it was chosen."
-        )
-
-    proposal_models = list(metrics.loc[metrics["in_proposal"], "model"])
-    models = list(metrics["model"]) if show_other_models else proposal_models
-    test_tab, step_tab = st.tabs(["Test period: forecast vs. actual", "Error by months ahead"])
-    with test_tab:
-        predictions = data.get_test_predictions(variable, "main_test")
-        actual = data.get_series(variable, start="2024-09")
-        st.plotly_chart(eval_charts.test_period_figure(actual, predictions, variable, models),
-                        config={"displayModeBar": False})
-        st.caption("Each model forecast September 2025 – August 2026 using only data up to August 2025.")
-    with step_tab:
-        errors = data.get_error_by_step(variable)
-        st.plotly_chart(eval_charts.error_by_step_figure(errors, variable, final_model, models),
-                        config={"displayModeBar": False})
-        st.caption("Forecasts become less accurate the further ahead they go. Dotted lines mark the 3-, 6-, and "
-                   "12-month views.")
-
-
-
-def method_notes(info, main_test_winner):
-    final = info["final_model_params"][info["final_model"]]
-    basis_note = (
-        f" It was originally planned for the September 2025 – August 2026 test period alone, where "
-        f"{main_test_winner} would have been chosen; the basis was widened because that period contains an "
-        "unusual price jump."
-        if main_test_winner != info["final_model"] else ""
-    )
-    with st.expander("How the forecast was made"):
-        st.markdown(f"""
-- **Data:** national Consumer Price Index, all items (2018 = 100), January 2018 – {pd.Timestamp(info['data']['end']):%B %Y}, from the Philippine Statistics Authority (PSA).
-- **Models compared:** ARIMA, Linear Regression, and Moving Average, as in the proposal. ETS is shown as an extra comparison only.
-- **Final model:** {info['final_model']}{f" {tuple(final['order'])} with an average increase of {final['drift_per_month']:.2f} index points per month" if 'order' in final else ''}.
-- **How it was chosen:** {info['selection']['rule']} The rule was applied to all six evaluation periods together (72 forecast months per model).{basis_note}
-- **Inflation and purchasing power** are calculated from the CPI forecast with PSA's formulas: inflation = CPI ÷ CPI a year earlier − 1; purchasing power = 1 ÷ (CPI ÷ 100).
-""")
-
-
-def disclaimer():
-    st.divider()
-    st.caption(
-        "**Forecast disclaimer:** forecasts are statistical estimates based only on past CPI patterns. They do "
-        "not account for events such as fuel price changes, typhoons, or policy changes, and are not financial "
-        "advice. **Source:** Philippine Statistics Authority (PSA), OpenSTAT."
-    )
-
 
 
 main()

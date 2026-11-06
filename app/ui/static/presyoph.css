@@ -344,8 +344,8 @@ div[data-testid="stAlert"] { border-radius: 12px; }
 .pp-kpi { min-height: 150px; }
 
 /* sizes taken from the Figma frames so rows line up without relying on Streamlit stretching columns */
-.st-key-insight_home { min-height: 462px; }
-.st-key-card_savings, .st-key-card_trend { min-height: 330px; }
+.st-key-card_regions, .st-key-card_top, .st-key-card_savings, .st-key-insight_home { min-height: 500px; }
+.st-key-card_trend { min-height: 330px; }
 .st-key-insight_fc { min-height: 190px; }
 .st-key-card_reg_rank, .st-key-card_reg_table { min-height: 560px; }
 /* Purchasing Power: the right column's height depends on the insight text, so the trend card stretches to match it */

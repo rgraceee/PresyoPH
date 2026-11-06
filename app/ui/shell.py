@@ -107,7 +107,7 @@ def sidebar(pages):
                 icon=icon,
 )
         md(f'<div class="pp-side-foot">{f"<img src={chr(34)}{art}{chr(34)} alt={chr(34)}{chr(34)}>" if art else ""}'
-           '<div class="pp-script">Better Data.<br>Smarter Decisions.<br>Stronger Households.</div></div>')
+           '</div>')
 
 
 def _go(target, state):

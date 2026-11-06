@@ -22,19 +22,19 @@ def summary_cards(latest, fies_all):
                        help="Consumer Price Index, 2018 = 100. A CPI of 136 means prices are about 36% above 2018.",
                        foot=f"vs. {month_label(cpi['date'] - pd.DateOffset(months=1))}")
     with cols[1]:
+        shell.kpi_card("Inflation Rate", theme.format_value("inflation", infl["value"]), "%", tone="deep",
+                       delta=f"{'▲' if infl['change'] >= 0 else '▼'} {abs(infl['change']):.1f} pts", bad=infl["change"] > 0,
+                       help="How much higher prices are than in the same month a year earlier.", foot="vs. last month")
+    with cols[2]:
         shell.kpi_card("Peso Purchasing Power", theme.format_value("purchasing_power", power["value"]), "₱",
                        delta=f"{'▲' if power['change'] >= 0 else '▼'} {abs(power['change']):.2f}", bad=power["change"] < 0,
                        tone="gold", help=f"Today's peso buys what about {power['value'] * 100:.0f} centavos bought in 2018.",
                        foot="vs. last month")
-    with cols[2]:
+    with cols[3]:
         shell.kpi_card("Average Household Spending", f"₱{fies_all['expenditure']:,.1f}k", "₱", tone="sage",
                        help="From the 2023 Family Income and Expenditure Survey (thousand pesos per family). "
                             "A 2023 snapshot, not a monthly figure.",
                        foot="FIES 2023 snapshot")
-    with cols[3]:
-        shell.kpi_card("Inflation Rate", theme.format_value("inflation", infl["value"]), "%", tone="deep",
-                       delta=f"{'▲' if infl['change'] >= 0 else '▼'} {abs(infl['change']):.1f} pts", bad=infl["change"] > 0,
-                       help="How much higher prices are than in the same month a year earlier.", foot="vs. last month")
 
 
 def price_trend_card(labels):
@@ -111,19 +111,16 @@ def insights_card(latest, top, ranking):
 def forecast_card(latest):
     with st.container(key="card_forecast"):
         shell.panel_header("Forecast (Next 3 Months)", "CPI forecast from the selected model, with 95% range")
-        left, right = st.columns([2.6, 1])
         forecast = data.get_forecast("cpi", 3)
         history = data.get_series("cpi", start=forecast["date"].iloc[0] - pd.DateOffset(months=12))
         info = data.get_model_info()
-        left.plotly_chart(charts.forecast_figure(history, forecast, "cpi", info["final_model"]),
-                          config={"displayModeBar": False})
+        st.plotly_chart(charts.forecast_figure(history, forecast, "cpi", info["final_model"]),
+                        config={"displayModeBar": False})
         pp = data.get_forecast("purchasing_power", 3).iloc[-1]
         now = latest["purchasing_power"]["value"]
-        with right:
-            shell.mini_card(f"Projected Purchasing Power ({month_label(pp['date'])})", f"{pp['forecast']:.2f}",
-                            f"{'▲' if pp['forecast'] >= now else '▼'} {abs(pp['forecast'] / now - 1) * 100:.1f}%",
-                            f"vs. {month_label(latest['purchasing_power']['date'])}", tone="green")
-            st.page_link("pages/forecasts.py", label="Full forecasts", icon=":material/trending_up:")
+        shell.mini_card(f"Projected Purchasing Power ({month_label(pp['date'])})", f"{pp['forecast']:.2f}",
+                        f"{'▲' if pp['forecast'] >= now else '▼'} {abs(pp['forecast'] / now - 1) * 100:.1f}%",
+                        f"vs. {month_label(latest['purchasing_power']['date'])}", tone="green")
 
 
 def render():
@@ -136,21 +133,18 @@ def render():
 
     summary_cards(latest, fies_all)
     labels = list(data.list_categories()["label"])
-    main, side = st.columns([2.3, 1])
-    with main:
-        price_trend_card(labels)
-        region_col, top5_col = st.columns(2)
-        with region_col:
-            regional_card()
-        with top5_col:
-            top_increases_card()
-        forecast_card(latest)
-    with side:
+    price_trend_card(labels)
+    forecast_card(latest)
+    region_col, top5_col = st.columns(2)
+    with region_col:
+        regional_card()
+    with top5_col:
+        top_increases_card()
+    save_col, insight_col = st.columns(2)
+    with save_col:
         savings_card()
+    with insight_col:
         insights_card(latest, top, ranking)
-    quote_col, _ = st.columns([2, 3])
-    with quote_col:
-        shell.quote_card()
 
 
 render()
