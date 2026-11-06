@@ -14,6 +14,15 @@ PERIODS = {"6 months": 6, "12 months": 12, "24 months": 24, "All": None}
 
 
 def summary_cards(latest, fies_all):
+    """Show four KPI cards: CPI, inflation, purchasing power, average spending.
+
+    Parameters
+    ----------
+    latest : dict
+        Output of data.get_latest(); keys are indicator names.
+    fies_all : pandas.Series
+        The "All Income Groups" row from get_fies_by_decile().
+    """
     cpi, infl, power = latest["cpi"], latest["inflation"], latest["purchasing_power"]
     cols = st.columns(4)
     with cols[0]:
@@ -38,6 +47,13 @@ def summary_cards(latest, fies_all):
 
 
 def price_trend_card(labels):
+    """Show a multi-line CPI chart for selected categories over a chosen period.
+
+    Parameters
+    ----------
+    labels : list of str
+        Category display labels to choose from.
+    """
     with st.container(key="card_trend"):
         head, pick = st.columns([3.2, 1], vertical_alignment="top")
         with head:
@@ -57,6 +73,7 @@ def price_trend_card(labels):
 
 
 def savings_card():
+    """Show a bar chart of savings rate by income decile (FIES 2023)."""
     with st.container(key="card_savings"):
         shell.panel_header("Savings by Household Income Group",
                            "Share of income saved, FIES 2023 (bottom 10% to top 10% of earners)", icon="house")
@@ -67,6 +84,7 @@ def savings_card():
 
 
 def regional_card():
+    """Show a ranked bar chart of CPI by region for the latest month."""
     with st.container(key="card_regions"):
         shell.panel_header("Cost of Living by Region", f"Consumer Price Index, {month_label(data.get_date_range('cpi')[1])}", icon="pin")
         ranking = data.get_regional_comparison("cpi")
@@ -79,6 +97,7 @@ def regional_card():
 
 
 def top_increases_card():
+    """Show the top 5 categories with the biggest one-month CPI rise."""
     with st.container(key="card_top"):
         shell.panel_header("Top 5 Price Increases (1 Month)", "Household necessities with the biggest CPI rise", icon="wallet")
         changes = queries.get_category_changes(1)
@@ -89,6 +108,17 @@ def top_increases_card():
 
 
 def insights_card(latest, top, ranking):
+    """Show key insights: top category, purchasing power change, regional spread.
+
+    Parameters
+    ----------
+    latest : dict
+        Output of data.get_latest().
+    top : dict
+        Output of data.get_top_category().
+    ranking : pandas.DataFrame
+        Output of data.get_regional_comparison("cpi").
+    """
     power = latest["purchasing_power"]
     hi, lo = ranking.iloc[0], ranking.iloc[-1]
     changes = queries.get_category_changes(1)
@@ -109,6 +139,7 @@ def insights_card(latest, top, ranking):
 
 
 def forecast_card(latest):
+    """Show the 3-month CPI forecast and projected purchasing power."""
     with st.container(key="card_forecast"):
         shell.panel_header("Forecast (Next 3 Months)", "CPI forecast from the selected model, with 95% range")
         forecast = data.get_forecast("cpi", 3)

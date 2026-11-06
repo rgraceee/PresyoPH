@@ -16,6 +16,19 @@ MEASURES = {"income": "Income", "expenditure": "Spending", "savings": "Savings"}
 
 
 def trend_figure(series, label):
+    """Build a line chart of purchasing power over time with a ₱1.00 reference line.
+
+    Parameters
+    ----------
+    series : pandas.DataFrame
+        Columns: date, value.
+    label : str
+        Series name for the legend.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+    """
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=series["date"], y=series["value"], mode="lines+markers", name=label, fill="tozeroy",
                              line=dict(color=tokens.INDICATOR_COLORS["inflation"], width=3), marker=dict(size=5),
@@ -29,6 +42,19 @@ def trend_figure(series, label):
 
 
 def group_bars(groups, selected):
+    """Build grouped bars of income, spending, and savings by income decile.
+
+    Parameters
+    ----------
+    groups : pandas.DataFrame
+        FIES data for one area, one row per decile.
+    selected : str
+        The selected decile (highlighted with a background band).
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+    """
     labels = [tokens.DECILE_SHORT[d] for d in groups["decile"]]
     fig = charts.grouped_bar_figure(labels, {MEASURES[m]: groups[m] for m in MEASURES},
                                     {MEASURES[m]: tokens.FIES_COLORS[m] for m in MEASURES}, y_title="Thousand pesos per family",
@@ -41,6 +67,7 @@ def group_bars(groups, selected):
 
 
 def render():
+    """Render the Purchasing Power and Household Finances page."""
     shell.page_header("Purchasing Power and Household Financial Analysis",
                       "Understand how household income, spending, and savings relate to the peso's purchasing power.",
                       shell.pill("Financial data based on the 2023 FIES snapshot", tone="gold"))

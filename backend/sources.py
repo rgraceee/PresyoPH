@@ -117,6 +117,7 @@ def _area_level(raw_name):
     if raw_name == "PHILIPPINES":
         return "national"
     name = raw_name.lstrip(".")
+    # PSA uses leading dots to show hierarchy: <= 2 dots = region, more = province/city.
     if name.startswith("Areas Outside"):
         return "area group"
     if len(raw_name) - len(name) <= 2:
@@ -203,7 +204,7 @@ def fies_table():
     wide.loc[wide["area"] == "PHILIPPINES", "area_level"] = "national"
     wide["area"] = wide["area"].replace(FIES_REGION_NAMES)
 
-    # Align province/city names with the CPI area labels.
+    # Align province/city names with the CPI area labels (case-insensitive match).
     cpi_areas = price_table("cpi")["area"].unique()
     area_lookup = {name.upper(): name for name in cpi_areas}
     wide["area"] = wide["area"].map(lambda name: area_lookup.get(name.upper(), name))

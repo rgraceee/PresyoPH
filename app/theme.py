@@ -66,5 +66,4 @@ def format_error(indicator, value):
 
 
 # Number formats for st.column_config / Plotly hover text.
-VALUE_FORMATS = {"cpi": "%.2f", "inflation": "%.1f%%", "purchasing_power": "₱%.2f"}
 PLOTLY_HOVER_FORMATS = {"cpi": ".2f", "inflation": ".1f", "purchasing_power": ".2f"}

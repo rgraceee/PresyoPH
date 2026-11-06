@@ -14,6 +14,21 @@ BAR_COLORS = ["#1B5E4B", "#E9AA2B", "#EE7B30", "#D94B3D", "#6FA06B", "#8FA79A"]
 
 
 def category_trend_figure(series, average, name):
+    """Build a line chart comparing one category's CPI to the all-items average.
+
+    Parameters
+    ----------
+    series : pandas.DataFrame
+        Columns: date, value for the selected category.
+    average : pandas.DataFrame
+        Columns: date, value for all items.
+    name : str
+        Category name for the legend.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+    """
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=series["date"], y=series["value"], mode="lines+markers", name=name, fill="tozeroy",
                              line=dict(color=tokens.INDICATOR_COLORS["cpi"], width=3), fillcolor="rgba(27,94,75,0.07)",
@@ -27,6 +42,15 @@ def category_trend_figure(series, average, name):
 
 
 def comparison_bars(ranking, selected_label):
+    """Render an HTML table with bar visuals showing each category's CPI.
+
+    Parameters
+    ----------
+    ranking : pandas.DataFrame
+        Category ranking output from get_category_comparison().
+    selected_label : str
+        The currently selected category label (shown in bold).
+    """
     values = ranking["value"]
     scale = values.max()
     rows = []
@@ -40,6 +64,7 @@ def comparison_bars(ranking, selected_label):
 
 
 def render():
+    """Render the Household Necessities page."""
     shell.page_header("Household Necessities Category Analysis",
                       "Compare price movements across the essential categories that shape Filipino household expenses.",
                       shell.chip("Updated " + month_label(data.get_date_range("cpi")[1])))

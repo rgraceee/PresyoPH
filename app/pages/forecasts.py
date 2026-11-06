@@ -56,19 +56,50 @@ def load_page_data():
 
 
 def _rule_winner(metrics):
+    """Pick the winning model using the 2-of-3-metrics rule.
+
+    Parameters
+    ----------
+    metrics : pandas.DataFrame
+        Model metrics for one variable and period.
+
+    Returns
+    -------
+    str
+        Name of the winning model.
+    """
     table = metrics[metrics["in_proposal"]].set_index("model")
     wins = pd.Series([table[m].idxmin() for m in METRIC_LABELS]).value_counts()
     return wins.index[0] if wins.iloc[0] >= 2 else table["rmse"].idxmin()
 
 
 def _change_text(variable, diff, base):
-    """Inflation is already a percentage, so its change is in points; the others are % of the base."""
+    """Format the change from the previous period as points or percent.
+
+    Inflation is already a percentage, so its change is in points; the others
+    are expressed as percent of the base value.
+    """
     if variable == "inflation":
         return f"{abs(diff):.1f} pts"
     return f"{abs(diff / base * 100):.1f}%"
 
 
 def chart_card(variable, horizon, forecast, final_model, show_other):
+    """Show the historical-vs-forecast chart for one variable and horizon.
+
+    Parameters
+    ----------
+    variable : str
+        One of "cpi", "inflation", "purchasing_power".
+    horizon : int
+        Forecast horizon in months (3, 6, or 12).
+    forecast : pandas.DataFrame
+        Forecast output from get_forecast().
+    final_model : str
+        Name of the selected model.
+    show_other : bool
+        Whether to add other models' forecasts as comparison lines.
+    """
     history = data.get_series(variable, start=forecast["date"].iloc[0] - pd.DateOffset(months=HISTORY_MONTHS))
     comparison = None
     if show_other:
@@ -89,7 +120,21 @@ def chart_card(variable, horizon, forecast, final_model, show_other):
 
 
 def results_card(variable, horizon, forecast, latest, final_model):
-    """One row per forecast month with its 95% range and change from the previous period."""
+    """Show a table of forecast months with 95% range and change from previous.
+
+    Parameters
+    ----------
+    variable : str
+        One of "cpi", "inflation", "purchasing_power".
+    horizon : int
+        Forecast horizon in months.
+    forecast : pandas.DataFrame
+        Forecast output from get_forecast().
+    latest : dict
+        Output of data.get_latest().
+    final_model : str
+        Name of the selected model.
+    """
     previous = latest[variable]["value"]
     rows = []
     for i, r in enumerate(forecast.itertuples()):
@@ -109,6 +154,7 @@ def results_card(variable, horizon, forecast, latest, final_model):
 
 
 def main():
+    """Render the Forecasting page."""
     with st.spinner("Loading data…"):
         info, latest, main_test_winner = load_page_data()
     final_model = info["final_model"]

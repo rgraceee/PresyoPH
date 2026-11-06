@@ -78,6 +78,8 @@ def _category_code(item):
 
 
 def _category_label(item):
+    # Look up the short display name by PSA code; if not found, fall back to
+    # the text after " - " in the item label, capitalised.
     return CATEGORY_LABELS.get(_category_code(item), item.split(" - ", 1)[-1].capitalize())
 
 
@@ -171,6 +173,8 @@ def get_series_wide(indicator, start=None, end=None, areas=None, items=None):
     frames = {}
     for area in areas:
         for item in items:
+            # The column key is the area when comparing areas, the item when
+            # comparing items, and just the area otherwise.
             key = area if len(areas) > 1 else (item if len(items) > 1 else area)
             frames[key] = get_series(indicator, start, end, area, item).set_index("date")["value"]
     return pd.DataFrame(frames)

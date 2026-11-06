@@ -20,6 +20,7 @@ REPORT_TYPES = ["Cost-of-Living Summary", "Commodity Price Trends", "Household P
 
 
 def _md_table(table):
+    """Convert a DataFrame to a Markdown table string."""
     header = "| " + " | ".join(map(str, table.columns)) + " |\n|" + "---|" * len(table.columns) + "\n"
     rows = "\n".join("| " + " | ".join(f"{v:,.2f}" if isinstance(v, float) else str(v) for v in row) + " |"
                      for row in table.itertuples(index=False))
@@ -27,11 +28,41 @@ def _md_table(table):
 
 
 def _at(indicator, month, area):
+    """Return the latest and previous values of an indicator at a given month.
+
+    Parameters
+    ----------
+    indicator : str
+        One of "cpi", "inflation", "purchasing_power".
+    month : pandas.Timestamp
+        The month to look up.
+    area : str
+        Area name.
+
+    Returns
+    -------
+    tuple of (float, float or None)
+        (current value, previous value).
+    """
     series = data.get_series(indicator, end=month, area=area)
     return series.iloc[-1]["value"], series.iloc[-2]["value"] if len(series) > 1 else None
 
 
 def cost_of_living_summary(month, area):
+    """Build a cost-of-living summary report for one month and area.
+
+    Parameters
+    ----------
+    month : pandas.Timestamp
+        The report month.
+    area : str
+        Area name.
+
+    Returns
+    -------
+    tuple of (list of str, pandas.DataFrame)
+        Findings and a comparison table.
+    """
     findings = []
     for ind in data.INDICATORS:
         now, before = _at(ind, month, area)
@@ -48,6 +79,20 @@ def cost_of_living_summary(month, area):
 
 
 def commodity_trends(month, area):
+    """Build a commodity price trends report for one month and area.
+
+    Parameters
+    ----------
+    month : pandas.Timestamp
+        The report month.
+    area : str
+        Area name.
+
+    Returns
+    -------
+    tuple of (list of str, pandas.DataFrame)
+        Findings and a comparison table.
+    """
     changes = queries.get_category_changes(6, month, area).set_index("label")
     inflation = data.get_category_comparison("inflation", month, area).set_index("label")["value"]
     table = pd.DataFrame({"CPI (2018=100)": changes["value"], "6-month change (%)": changes["change_pct"],
@@ -60,6 +105,20 @@ def commodity_trends(month, area):
 
 
 def household_purchasing_power(month, area):
+    """Build a household purchasing power report for one month and area.
+
+    Parameters
+    ----------
+    month : pandas.Timestamp
+        The report month.
+    area : str
+        Area name.
+
+    Returns
+    -------
+    tuple of (list of str, pandas.DataFrame)
+        Findings and a FIES table.
+    """
     series = data.get_purchasing_power(end=month, area=area).tail(13)
     now, then = series["value"].iloc[-1], series["value"].iloc[0]
     fies = data.get_fies_by_decile(area if area in data.list_areas("region") else data.NATIONAL)
@@ -73,6 +132,20 @@ def household_purchasing_power(month, area):
 
 
 def regional_comparison(month, area):
+    """Build a regional comparison report for one month.
+
+    Parameters
+    ----------
+    month : pandas.Timestamp
+        The report month.
+    area : str
+        Area name (unused; report covers all regions).
+
+    Returns
+    -------
+    tuple of (list of str, pandas.DataFrame)
+        Findings and a regional comparison table.
+    """
     frames = [data.get_regional_comparison(ind, month).set_index("region")["value"].rename(theme.INDICATOR_SHORT_NAMES[ind])
               for ind in data.INDICATORS]
     table = pd.concat(frames, axis=1).sort_values("CPI", ascending=False).reset_index(names="Region")
@@ -82,6 +155,20 @@ def regional_comparison(month, area):
 
 
 def forecast_results(month, area):
+    """Build a CPI forecast and model results report.
+
+    Parameters
+    ----------
+    month : pandas.Timestamp
+        The report month (unused; report covers the next 12 months).
+    area : str
+        Area name (unused; report covers national).
+
+    Returns
+    -------
+    tuple of (list of str, pandas.DataFrame)
+        Findings and a forecast table.
+    """
     info = data.get_model_info()
     frames = [data.get_forecast(v, 12).set_index("date")["forecast"].rename(theme.INDICATOR_SHORT_NAMES[v]) for v in data.INDICATORS]
     table = pd.concat(frames, axis=1).reset_index(names="Month")
@@ -100,6 +187,23 @@ BUILDERS = {"Cost-of-Living Summary": cost_of_living_summary, "Commodity Price T
 
 
 def build_report(kind, month, area):
+    """Build a full report (findings + table + Markdown) for one report type.
+
+    Parameters
+    ----------
+    kind : str
+        Report type (must be a key in BUILDERS).
+    month : pandas.Timestamp
+        The report month.
+    area : str
+        Area name.
+
+    Returns
+    -------
+    dict
+        Report record with id, kind, coverage, scope, generated, findings,
+        table, and markdown.
+    """
     findings, table = BUILDERS[kind](month, area)
     coverage = "Next 12 months" if kind == REPORT_TYPES[4] else month_label(month)
     scope = "All regions" if kind in (REPORT_TYPES[3], REPORT_TYPES[4]) else area_label(area)
@@ -112,6 +216,7 @@ def build_report(kind, month, area):
 
 
 def render():
+    """Render the Reports page."""
     shell.page_header("Reports", "Generate and download PresyoPH analytics reports from the latest PSA data.",
                       shell.pill("Built from the same data as the dashboard", dot=True))
     reports = st.session_state.setdefault("reports", [])

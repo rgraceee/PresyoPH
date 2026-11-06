@@ -7,6 +7,7 @@ from backend import data
 
 
 def render():
+    """Render the About / Methodology page."""
     shell.page_header("About PresyoPH", "Four PSA datasets in one place, so households, students, researchers, and planners "
                       "can see how the cost of living is changing and what may come next.")
 

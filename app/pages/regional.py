@@ -12,13 +12,29 @@ NAMES = {"cpi": "Consumer Price Index (CPI)", "inflation": "Inflation rate", "pu
 
 
 def short(region):
-    """'Region IV-A (CALABARZON)' -> 'CALABARZON'; keeps the region code as a sub label."""
+    """'Region IV-A (CALABARZON)' -> ('CALABARZON', 'Region IV-A').
+
+    Splits a region name into its short code (in parentheses) and the rest.
+    """
     if "(" in region:
         return region[region.index("(") + 1:region.rindex(")")], region[:region.index("(")].strip()
     return region, ""
 
 
 def ranking_card(ranking, indicator, selected, suffix):
+    """Render an HTML table with bar visuals ranking regions by value.
+
+    Parameters
+    ----------
+    ranking : pandas.DataFrame
+        Output of get_regional_comparison().
+    indicator : str
+        One of "cpi", "inflation", "purchasing_power".
+    selected : str
+        The currently selected region (highlighted).
+    suffix : str
+        Unit suffix for values ("%" or "").
+    """
     ranking = ranking.reset_index(drop=True)
     top = ranking["value"].max()
     rows = []
@@ -36,6 +52,19 @@ def ranking_card(ranking, indicator, selected, suffix):
 
 
 def table_card(ranking, indicator, selected, suffix):
+    """Render an HTML table with region values and difference from national.
+
+    Parameters
+    ----------
+    ranking : pandas.DataFrame
+        Output of get_regional_comparison().
+    indicator : str
+        One of "cpi", "inflation", "purchasing_power".
+    selected : str
+        The currently selected region (highlighted).
+    suffix : str
+        Unit suffix for values ("%" or "").
+    """
     national = ranking.attrs["national"]
     rows = []
     for _, r in ranking.iterrows():
@@ -55,6 +84,7 @@ def table_card(ranking, indicator, selected, suffix):
 
 
 def render():
+    """Render the Regional Comparison page."""
     last = data.get_date_range("cpi")[1]
     shell.page_header("Regional Cost-of-Living Comparison",
                       "Compare price levels, inflation, and household purchasing power across Philippine regions.",

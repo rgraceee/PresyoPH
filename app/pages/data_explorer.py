@@ -15,6 +15,18 @@ DATASETS = {
 
 
 def price_table(indicator):
+    """Show filter controls and return a filtered price table for one indicator.
+
+    Parameters
+    ----------
+    indicator : str
+        One of "cpi", "inflation", "purchasing_power".
+
+    Returns
+    -------
+    pandas.DataFrame
+        The filtered long table.
+    """
     months = month_options(indicator)
     start, end = st.select_slider("Date range", options=months, value=(months[0], months[-1]), format_func=month_label)
     areas = st.multiselect("Areas", area_options(), default=[data.NATIONAL], format_func=area_label)
@@ -27,6 +39,13 @@ def price_table(indicator):
 
 
 def fies_table():
+    """Show filter controls and return a filtered FIES table.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The filtered FIES table with renamed columns.
+    """
     areas = st.multiselect("Areas", [data.NATIONAL] + data.list_areas("region"), default=[data.NATIONAL],
                            format_func=area_label)
     groups = st.multiselect("Income levels", list(tokens.DECILE_SHORT), default=list(tokens.DECILE_SHORT),
@@ -39,6 +58,7 @@ def fies_table():
 
 
 def render():
+    """Render the Data Explorer page."""
     shell.page_header("Data Explorer", "Browse the data behind the charts and download it as CSV.",
                       shell.pill("Public PSA statistics, no personal data", dot=True))
     with st.container(key="filter_explorer"):

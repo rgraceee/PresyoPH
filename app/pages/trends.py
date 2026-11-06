@@ -10,6 +10,21 @@ from backend import data
 
 
 def dual_axis_figure(cpi, inflation, height=420):
+    """Build a chart with CPI on the left axis and inflation on the right axis.
+
+    Parameters
+    ----------
+    cpi : pandas.DataFrame
+        Columns: date, value.
+    inflation : pandas.DataFrame
+        Columns: date, value.
+    height : int
+        Chart height in pixels.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+    """
     """CPI (left axis, area) and inflation rate (right axis, line) on one chart."""
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -33,6 +48,7 @@ def dual_axis_figure(cpi, inflation, height=420):
 
 
 def render():
+    """Render the Cost-of-Living Trends page."""
     shell.page_header("Cost-of-Living Trend Analysis",
                       "Track historical price movements and inflation patterns across the Philippines.",
                       shell.chip("Data updated through " + month_label(data.get_date_range("cpi")[1])))
