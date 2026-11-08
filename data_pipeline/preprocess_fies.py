@@ -1,3 +1,44 @@
+"""
+================================================================================
+FILE: data_pipeline/preprocess_fies.py
+================================================================================
+WHAT THIS FILE IS FOR:
+----------------------
+Preprocesses the raw FIES.csv file from datasets/raw/ into a cleaned CSV
+at datasets/processed/fies_clean.csv.
+
+The FIES (Family Income and Expenditure Survey) is a 2023 snapshot showing
+how much Filipino families earn, spend, and save across 10 income deciles.
+It is NOT a monthly time series and is NOT forecast.
+
+Steps:
+  1. Check the raw FIES.csv file exists
+  2. Read the raw CSV (with encoding fallback)
+  3. Select relevant columns (area, income group, indicator, value)
+  4. Rename columns to standard names
+  5. Standardize area names (remove PSA leading dots)
+  6. Standardize income group names
+  7. Standardize indicator names (remove unit text)
+  8. Convert values to numeric
+  9. Add year (2023) and unit columns
+  10. Reorder columns
+  11. Sort data
+  12-17. Validate: row counts, missing values, duplicates, indicators, year, units
+  18. Preview cleaned data
+  19. Export to fies_clean.csv if validation passes
+
+================================================================================
+HOW IT CONNECTS TO OTHER FILES:
+-------------------------------
+- datasets/raw/FIES.csv: Input file (raw PSA FIES data).
+- datasets/processed/fies_clean.csv: Output file (cleaned FIES data).
+- data_pipeline/load_database.py: Loads fies_clean.csv into the MySQL fies table.
+- backend/sources.py: Reads from the MySQL fies table via fies_table().
+- backend/data.py: Provides get_fies(), get_fies_by_decile(), get_fies_by_region().
+
+================================================================================
+"""
+
 from pathlib import Path
 import pandas as pd
 

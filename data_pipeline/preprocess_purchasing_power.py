@@ -1,3 +1,37 @@
+"""
+================================================================================
+FILE: data_pipeline/preprocess_purchasing_power.py
+================================================================================
+WHAT THIS FILE IS FOR:
+----------------------
+Preprocesses the raw PurchasingPower.xlsx file from datasets/raw/ into a
+cleaned CSV at datasets/processed/purchasing_power_clean.csv.
+
+Purchasing power of the peso is a monthly time series (Jan 2018 - Aug 2026)
+showing how much a peso can buy compared with the 2018 base year. It has no
+commodity breakdown (only "all items").
+
+Steps:
+  1. Read the raw Excel file (no header row)
+  2. Isolate observation rows (120 geographic areas)
+  3. Identify monthly columns (year + period, skipping "Ave")
+  4. Convert wide format to long format (date, area, value, unit, base_year)
+  5. Remove unavailable observations (Sep-Dec 2026)
+  6. Validate: row counts, missing values, duplicates, coverage
+  7. Export to purchasing_power_clean.csv if validation passes
+
+================================================================================
+HOW IT CONNECTS TO OTHER FILES:
+-------------------------------
+- datasets/raw/PurchasingPower.xlsx: Input file (raw PSA purchasing power data).
+- datasets/processed/purchasing_power_clean.csv: Output file.
+- data_pipeline/load_database.py: Loads into MySQL purchasing_power table.
+- backend/sources.py: Reads from MySQL via price_table() and series().
+- backend/data.py: Provides get_purchasing_power(), get_series().
+
+================================================================================
+"""
+
 from pathlib import Path
 import pandas as pd
 

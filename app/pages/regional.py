@@ -1,20 +1,64 @@
+"""
+================================================================================
+FILE: app/pages/regional.py
+================================================================================
+WHAT THIS FILE IS FOR:
+----------------------
+Screen 5: Regional Comparison. Compares price levels, inflation, and purchasing
+power across Philippine regions. Users can select an indicator, region group
+(Luzon/Visayas/Mindanao/All), specific region, month, and category. Shows:
+
+  - A ranked bar chart of regions
+  - A detailed table with values and difference from national
+  - Notes on regions and indicators
+
+================================================================================
+HOW IT CONNECTS TO OTHER FILES:
+-------------------------------
+- app/streamlit_app.py: Registers this page as "regional".
+- backend/data.py: Calls data.get_date_range(), data.get_regional_comparison(),
+  data.list_categories(), data.ALL_ITEMS, data.NATIONAL.
+- app/ui/shell.py: Calls shell.page_header(), shell.chip(), shell.filter_stat(),
+  shell.panel_header(), shell.rank_color(), shell.rank_legend(), shell.esc().
+- app/ui/layout.py: Calls month_label(), month_options().
+- app/ui/charts.py: Does NOT import charts directly here.
+- app/ui/queries.py: Calls queries.list_region_groups(), queries.regions_in_group(),
+  queries.region_group_of().
+- app/ui/theme.py: Calls theme.INDICATOR_SHORT_NAMES.
+- backend/data.py: Calls data.get_regional_comparison().
+
+================================================================================
+"""
+
 """Screen 5: Regional Comparison (Figma: Regional Cost-of-Living Comparison)."""
 
-import streamlit as st
+import streamlit as st                                # streamlit: UI components
 
-from app import theme
-from app.ui import charts, queries, shell
-from app.ui.layout import month_label, month_options
-from backend import data
+from app import theme                                 # theme: short indicator names
+from app.ui import charts, queries, shell             # shell: UI components; queries: region group helpers
+from app.ui.layout import month_label, month_options  # UI helpers
+from backend import data                              # backend: data access functions
 
+# Indicator choices for the dropdown.
 INDICATOR_CHOICES = ["cpi", "inflation", "purchasing_power"]
+# Human-readable names for each indicator.
 NAMES = {"cpi": "Consumer Price Index (CPI)", "inflation": "Inflation rate", "purchasing_power": "Purchasing power of the peso"}
 
 
 def short(region):
-    """'Region IV-A (CALABARZON)' -> ('CALABARZON', 'Region IV-A').
-
-    Splits a region name into its short code (in parentheses) and the rest.
+    """Split a region name into short code and full name.
+    
+    'Region IV-A (CALABARZON)' -> ('CALABARZON', 'Region IV-A')
+    
+    Parameters
+    ----------
+    region : str
+        Full region name.
+    
+    Returns
+    -------
+    tuple of (str, str)
+        (short_code, full_name_without_code)
     """
     if "(" in region:
         return region[region.index("(") + 1:region.rindex(")")], region[:region.index("(")].strip()
@@ -23,11 +67,11 @@ def short(region):
 
 def ranking_card(ranking, indicator, selected, suffix):
     """Render an HTML table with bar visuals ranking regions by value.
-
+    
     Parameters
     ----------
     ranking : pandas.DataFrame
-        Output of get_regional_comparison().
+        Output of data.get_regional_comparison().
     indicator : str
         One of "cpi", "inflation", "purchasing_power".
     selected : str
@@ -36,28 +80,29 @@ def ranking_card(ranking, indicator, selected, suffix):
         Unit suffix for values ("%" or "").
     """
     ranking = ranking.reset_index(drop=True)
-    top = ranking["value"].max()
+    top = ranking["value"].max()                         # For bar width percentages
     rows = []
     for i, r in ranking.iterrows():
-        name, code = short(r["region"])
-        bold = "font-weight:800" if r["region"] == selected else ""
-        bg = "background:#eaf2e6;" if r["region"] == selected else ""
+        name, code = short(r["region"])                  # Split region name
+        bold = "font-weight:800" if r["region"] == selected else ""  # Bold selected row
+        bg = "background:#eaf2e6;" if r["region"] == selected else ""  # Light green background for selected
+        # Bar width proportional to value, colour by rank (green=good for purchasing power, red=bad for CPI/inflation)
         rows.append(f'<tr style="{bg}"><td style="width:22px;color:#6b7f78;font-size:11px">{r["rank"]}</td>'
                     f'<td style="width:36%;font-size:12px;{bold}">{shell.esc(name)}<small>{shell.esc(code)}</small></td>'
                     f'<td><div class="pp-bar" style="height:10px"><i style="width:{r["value"] / top * 100:.1f}%;'
                     f'background:{shell.rank_color(i, len(ranking), indicator == "purchasing_power")}"></i></div></td>'
                     f'<td class="num" style="width:56px;font-weight:700">{r["value"]:.{2 if indicator == "purchasing_power" else 1}f}{suffix}</td></tr>')
     st.markdown(f'<table class="pp-tbl">{"".join(rows)}</table>', unsafe_allow_html=True)
-    shell.rank_legend(indicator == "purchasing_power")
+    shell.rank_legend(indicator == "purchasing_power")   # Show colour legend
 
 
 def table_card(ranking, indicator, selected, suffix):
     """Render an HTML table with region values and difference from national.
-
+    
     Parameters
     ----------
     ranking : pandas.DataFrame
-        Output of get_regional_comparison().
+        Output of data.get_regional_comparison().
     indicator : str
         One of "cpi", "inflation", "purchasing_power".
     selected : str
@@ -65,13 +110,14 @@ def table_card(ranking, indicator, selected, suffix):
     suffix : str
         Unit suffix for values ("%" or "").
     """
-    national = ranking.attrs["national"]
+    national = ranking.attrs["national"]                 # National value for comparison
     rows = []
     for _, r in ranking.iterrows():
         name, code = short(r["region"])
         diff = r["difference_from_national"]
-        pct = diff / national * 100 if national else 0
-        good = diff >= 0 if indicator == "purchasing_power" else diff < 0  # higher cost is worse, higher buying power is better
+        pct = diff / national * 100 if national else 0   # Percent difference from national
+        # For CPI/inflation, higher diff is worse; for purchasing power, higher diff is better
+        good = diff >= 0 if indicator == "purchasing_power" else diff < 0
         cls, arrow = ("up" if good else "dn"), ("▲" if diff >= 0 else "▼")
         gap = f"{abs(diff):.1f} pts" if indicator == "inflation" else f"{abs(pct):.1f}%"
         sel = ' class="sel"' if r["region"] == selected else ""
@@ -85,32 +131,33 @@ def table_card(ranking, indicator, selected, suffix):
 
 def render():
     """Render the Regional Comparison page."""
-    last = data.get_date_range("cpi")[1]
+    last = data.get_date_range("cpi")[1]                 # Latest data date
     shell.page_header("Regional Cost-of-Living Comparison",
                       "Compare price levels, inflation, and household purchasing power across Philippine regions.",
                       shell.chip(month_label(last), icon="calendar", boxed=True, sub="Latest available period"))
 
-    groups = queries.list_region_groups()
+    groups = queries.list_region_groups()                # ["All Regions", "Luzon", "Visayas", "Mindanao"]
     if st.session_state.get("reg_group") not in groups:
         st.session_state["reg_group"] = groups[0]
-    with st.container(key="filter_reg"):
+    with st.container(key="filter_reg"):                 # Filter controls
         c1, c2, c3, c4, c5 = st.columns([1.5, 1.1, 1.5, 1.0, 1.7], vertical_alignment="center")
         indicator = c1.selectbox("Indicator", INDICATOR_CHOICES, format_func=NAMES.get, key="reg_indicator")
         group = c2.selectbox("Region Group", groups, key="reg_group")
-        region_options = queries.regions_in_group(group)
+        region_options = queries.regions_in_group(group) # Regions in the selected group
         if st.session_state.get("reg_region") not in region_options:
             st.session_state["reg_region"] = region_options[0]
         selected = c3.selectbox("Selected Region", region_options, key="reg_region")
-        months = month_options(indicator)
+        months = month_options(indicator)                # Available months for this indicator
         month = c4.selectbox("Month", list(reversed(months)), format_func=month_label, key="reg_month")
         categories = data.list_categories(include_all_items=True)
-        item = data.ALL_ITEMS
-        if indicator != "purchasing_power":
+        item = data.ALL_ITEMS                            # Default: all items
+        if indicator != "purchasing_power":              # Purchasing power has no category breakdown
             label = st.selectbox("Category", list(categories["label"]), key="reg_category")
-            item = categories.set_index("label").loc[label, "item"]
+            item = categories.set_index("label").loc[label, "item"]  # PSA item code
         else:
             st.caption("Purchasing power is published for all items only, so there is no category filter.")
 
+    # Get regional comparison data
     ranking = data.get_regional_comparison(indicator, month, item, region_options)
     suffix = "%" if indicator == "inflation" else ""
     value = ranking.loc[ranking["region"] == selected, "value"]
@@ -119,9 +166,11 @@ def render():
         shell.filter_stat(f"Selected Region: {short(selected)[0]}", f"{value.iloc[0]:{fmt}}{suffix}",
                           f"Philippines: {ranking.attrs['national']:{fmt}}{suffix}")
 
+    # Warn if regions have tied values
     if ranking["value"].round(2).duplicated(keep=False).any():
         st.caption("Regions with the same published value are tied; their order here is not meaningful.")
 
+    # Two-column layout: ranking chart (left) and detail table (right)
     left, right = st.columns([1.15, 1])
     with left:
         with st.container(key="card_reg_rank"):
@@ -140,4 +189,4 @@ def render():
             "- Household income, spending, and savings by region (2023) are on the Purchasing Power page.")
 
 
-render()
+render()                                               # Execute the page when Streamlit loads it
