@@ -14,7 +14,6 @@ MODEL_BLURBS = {
     "ARIMA": "Auto-regressive integrated moving average",
     "Linear Regression": "Trend-based statistical regression",
     "Moving Average": "Baseline built from recent observations",
-    "ETS": "Exponential smoothing (extra comparison only)",
 }
 
 EVALUATION_OPTIONS = {

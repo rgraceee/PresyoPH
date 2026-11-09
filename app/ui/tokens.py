@@ -2,7 +2,7 @@
 
 INDICATOR_COLORS = {"cpi": "#1B5E4B", "inflation": "#E9AA2B", "purchasing_power": "#EE7B30"}
 
-MODEL_COLORS = {"ARIMA": "#1B5E4B", "Linear Regression": "#E9AA2B", "Moving Average": "#EE7B30", "ETS": "#9CA3AF"}
+MODEL_COLORS = {"ARIMA": "#1B5E4B", "Linear Regression": "#E9AA2B", "Moving Average": "#EE7B30"}
 
 ACTUAL_COLOR = "#0F3D36"
 

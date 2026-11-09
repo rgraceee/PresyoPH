@@ -65,17 +65,10 @@
     "Moving Average": {
       "k": 3,
       "level": 135.83333333333334
-    },
-    "ETS": {
-      "damped_trend": false,
-      "aic": 193.13851793729862,
-      "smoothing_level": 0.9999,
-      "smoothing_trend": 9.999000000000001e-05
     }
   },
   "notes": [
     "Only CPI is modeled. Inflation and purchasing power are derived from the CPI forecast.",
-    "ETS is not in the proposal and is reported for comparison only.",
     "The selection basis was changed from the main test to the pooled six origins after the results were seen.",
     "Forecasts rely only on historical CPI and do not account for external factors."
   ]

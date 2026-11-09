@@ -4,7 +4,7 @@
 
 This document describes how the CPI forecasting models were built, evaluated, and selected, and what they found. It is written for the team and as source material for the paper. Every number here comes from the notebooks in `notebooks/` and the files in `datasets/outputs/`, which can be regenerated from the raw PSA data (see [Reproducing the results](#9-reproducing-the-results)).
 
-**In short:** national all-items CPI was forecast with ARIMA, Linear Regression, and Moving Average (plus ETS as an unofficial extra). Evaluated over six forecast periods (72 months per model), **ARIMA was the most accurate on all three metrics** and was selected. Its forecast has CPI rising from 136.4 (August 2026) to about 141.2 by August 2027.
+**In short:** national all-items CPI was forecast with ARIMA, Linear Regression, and Moving Average. Evaluated over six forecast periods (72 months per model), **ARIMA was the most accurate on all three metrics** and was selected. Its forecast has CPI rising from 136.4 (August 2026) to about 141.2 by August 2027.
 
 ---
 
@@ -68,9 +68,8 @@ Code: `modeling/models.py`. Each model is tuned on its training data only.
 | **ARIMA** | ARIMA(p, 1, q) with drift (a constant average monthly change) | 18 candidates: p, q ∈ {0, 1, 2}, with and without a seasonal AR(1)<sub>12</sub> term; lowest AIC, but among candidates within 2 AIC points the one with fewest parameters (parsimony rule, Burnham & Anderson 2002) | ARIMA(1, 1, 0), drift 0.349 per month, AR coefficient 0.35 |
 | **Linear Regression** | CPI = a + b × t, ordinary least squares on a time index | none | CPI = 95.37 + 0.375 t (R² = 0.968) |
 | **Moving Average** | flat forecast equal to the mean of the last k months | k ∈ {3, 6, 12}, lowest RMSE on the last 12 training months | k = 3 (validation RMSE 1.41 vs. 1.71 and 2.46) |
-| **ETS** *(extra, not in the proposal)* | Holt's exponential smoothing, additive error and trend | damped or not, by AIC with the same parsimony rule | no damping; level smoothing ≈ 1.0, trend smoothing 0.088 |
 
-**Prediction intervals (95%).** ARIMA and ETS: from the fitted model. Linear Regression: OLS prediction interval. Moving Average: empirical quantiles of its own past errors at each step ahead. Inflation and purchasing power intervals are converted from the CPI interval; both formulas move in one direction with CPI, so the conversion is exact.
+**Prediction intervals (95%).** ARIMA: from the fitted model. Linear Regression: OLS prediction interval. Moving Average: empirical quantiles of its own past errors at each step ahead. Inflation and purchasing power intervals are converted from the CPI interval; both formulas move in one direction with CPI, so the conversion is exact.
 
 **Diagnostics at the test origin.**
 - ARIMA residuals show no remaining autocorrelation (Ljung–Box p = 0.44, 0.29, 0.36 at lags 6, 12, 24). They are slightly skewed and heavy-tailed (Jarque–Bera p = 0.03), so intervals are approximate.
@@ -90,7 +89,6 @@ CPI forecast error by period:
 | ARIMA | 2.54 | **0.59** | 3.54 | −0.24 |
 | Linear Regression | **1.93** | 1.58 | **2.24** | −1.49 |
 | Moving Average | 5.67 | 2.17 | 7.72 | +1.87 |
-| ETS *(extra)* | 3.42 | 0.80 | 4.77 | +0.35 |
 
 *Mean error = actual − forecast; negative means the forecast was too high.*
 
@@ -104,13 +102,13 @@ CPI forecast error by period:
 
 CPI RMSE at each origin:
 
-| Origin | ARIMA | Linear Regression | Moving Average | ETS *(extra)* |
+| Origin | ARIMA | Linear Regression | Moving Average |
 |---|---|---|---|---|
-| Aug 2022 | **2.02** | 5.26 | 4.90 | 2.75 |
-| Feb 2023 | **2.57** | 3.93 | 2.63 | 3.66 |
-| Aug 2023 | 1.39 | 3.00 | 3.64 | **0.50** |
-| Feb 2024 | 1.42 | **1.36** | 2.06 | 2.13 |
-| Aug 2024 | 1.77 | **1.25** | 1.41 | 1.87 |
+| Aug 2022 | **2.02** | 5.26 | 4.90 |
+| Feb 2023 | **2.57** | 3.93 | 2.63 |
+| Aug 2023 | 1.39 | 3.00 | 3.64 |
+| Feb 2024 | 1.42 | **1.36** | 2.06 |
+| Aug 2024 | 1.77 | **1.25** | 1.41 |
 | Aug 2025 (main test) | 2.54 | **1.93** | 5.67 | 3.42 |
 
 Among the proposal models, ARIMA ranks first at the three earlier origins and Linear Regression at the three most recent. Linear Regression has done well recently but poorly earlier, especially from August 2022.
@@ -122,7 +120,6 @@ Among the proposal models, ARIMA ranks first at the three earlier origins and Li
 | **ARIMA** | **1.71** | **2.01** | **1.36** | **1.42** | **1.66** | **1.45** |
 | Linear Regression | 2.67 | 3.14 | 2.15 | 2.25 | 2.69 | 2.04 |
 | Moving Average | 3.00 | 3.71 | 2.37 | 2.48 | 3.05 | 2.04 |
-| ETS *(extra)* | 2.10 | 2.61 | 1.66 | 1.74 | 2.16 | 1.76 |
 
 ### 6.3 Model selection
 
@@ -131,26 +128,23 @@ Among the proposal models, ARIMA ranks first at the three earlier origins and Li
 | **Pooled, six origins (used)** | **ARIMA** | Lowest MAE, RMSE, and MAPE for CPI (3 of 3) |
 | Main test only (original plan) | Linear Regression | Lowest MAE, RMSE, and MAPE for CPI (3 of 3) |
 
-ARIMA is also the most accurate for the derived inflation and purchasing power on the pooled results, so the same model would be chosen for every variable. Including ETS does not change either result.
+ARIMA is also the most accurate for the derived inflation and purchasing power on the pooled results, so the same model would be chosen for every variable. 
 
 ### 6.4 Error by forecast step
 
 Mean absolute CPI error by months ahead, pooled over six origins:
 
-| Months ahead | ARIMA | Linear Regression | Moving Average | ETS *(extra)* |
+| Months ahead | ARIMA | Linear Regression | Moving Average |
 |---|---|---|---|---|
-| 1 | **0.49** | 2.54 | 0.89 | 0.57 |
-| 3 | 1.18 | 2.48 | 1.41 | **1.17** |
-| 6 | **1.44** | 2.71 | 3.07 | 1.89 |
-| 12 | **2.56** | 2.92 | 5.12 | 3.36 |
+| 1 | **0.49** | 2.54 | 0.89 |
+| 3 | 1.18 | 2.48 | 1.41 |
+| 6 | **1.44** | 2.71 | 3.07 |
+| 12 | **2.56** | 2.92 | 5.12 |
 
 ARIMA's error grows steadily with the horizon, so the dashboard's 3-month view is considerably more reliable than its 12-month view. Linear Regression's error is about 2.5 points even one month ahead, because its line reflects the long-run trend rather than the latest CPI level.
 
 ![Error by step](../reports/figures/16_error_by_step.png)
 
-### 6.5 ETS (extra model)
-
-ETS ranks second on the pooled results (CPI RMSE 2.61), between ARIMA and Linear Regression, and was the best model from one origin (August 2023). Since it does not beat ARIMA overall, adding it to the proposal would not change the final model. It can be presented to the instructor as a fourth model for comparison if desired.
 
 ## 7. Final forecast (September 2026 – August 2027)
 
@@ -195,7 +189,7 @@ Set up the `presyoph_db` database first (see the README) and keep MySQL running.
 | `modeling/config.py` | Split, horizon, rolling origins, tuning grids, selection rule |
 | `backend/sources.py` | Loads the series from `presyoph_db` |
 | `modeling/derive.py` | Inflation and purchasing power from CPI |
-| `modeling/models.py` | The four models |
+| `modeling/models.py` | The three models |
 | `modeling/evaluation.py` | Metrics, selection rule, rolling origin |
 | `modeling/run_pipeline.py` | Runs everything and writes `datasets/outputs/` |
 | `backend/data.py` | Functions for the dashboard pages |
@@ -211,5 +205,4 @@ These are needed so YEAR 4_2 / SIA TITLES match what was done. The team should a
 3. **Research Design / Scope and Feasibility:** add one sentence: *Forecasted inflation and purchasing power are derived from the forecasted CPI using PSA's formulas rather than modeled separately; CPI remains the sole forecasting target.*
 4. **Proposed System Features (5) and Dashboard Output (2):** mention that inflation and purchasing power forecasts are shown alongside the CPI forecast.
 5. **Data Sources:** add the base years (CPI, inflation, and purchasing power: 2018 = 100; FIES: constant 2021 prices). The text "ARIMA/SARIMA … including the seasonal-differencing step" can be updated: seasonal differencing was tested and rejected (section 3).
-6. **Section V, Tools:** Statsmodels was used for ARIMA, ETS, and the regression; Scikit-learn was not needed (metrics are computed directly).
-7. **Only if the instructor approves ETS:** update Research Question 5, Objective 3, the Analytics Technique, and the Evaluation Plan to name four models.
+6. **Section V, Tools:** Statsmodels was used for ARIMA and the regression; Scikit-learn was not needed (metrics are computed directly).

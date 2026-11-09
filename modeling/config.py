@@ -32,8 +32,6 @@ ROLLING_HORIZON = HORIZON
 
 # --- Model settings ---
 PROPOSAL_MODELS = ["ARIMA", "Linear Regression", "Moving Average"]
-EXTRA_MODELS = ["ETS"]
-ETS_ELIGIBLE_FOR_SELECTION = False
 
 # ARIMA: d = 1 from stationarity checks; p and q chosen by AIC.
 ARIMA_D = 1
@@ -49,8 +47,6 @@ AIC_TOLERANCE = 2.0
 MA_WINDOWS = [3, 6, 12]
 VALIDATION_MONTHS = 12
 
-# ETS: additive trend, with or without damping, chosen by AIC.
-ETS_DAMPED_OPTIONS = [False, True]
 
 # Prediction intervals shown on the dashboard (95%).
 INTERVAL_LEVEL = 0.95

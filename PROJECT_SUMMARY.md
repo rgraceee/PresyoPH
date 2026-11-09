@@ -12,7 +12,7 @@ PresyoPH is a Streamlit dashboard that helps Filipino households, students, rese
 | Streamlit | 1.64.0 | Web dashboard framework - builds the UI, pages, and interactive controls |
 | pandas | 3.0.6 | Data manipulation - DataFrames for all data processing and analysis |
 | numpy | 2.5.3 | Numerical computing - math operations used by models and metrics |
-| statsmodels | 0.15.0 | Statistical models - ARIMA and ETS forecasting |
+| statsmodels | 0.15.0 | Statistical models - ARIMA forecasting |
 | plotly | 7.1.0 | Interactive charts - all graphs and figures in the dashboard |
 | mysql-connector-python | 26.7.0 | Database driver - connects Python to the MySQL database |
 | scikit-learn | 1.9.1 | ML utilities - available for modeling support |
@@ -63,7 +63,7 @@ PresyoPH/
 │   ├── config.py                 # Evaluation setup: splits, horizons, model settings, selection rule
 │   ├── derive.py                 # Derive inflation and purchasing power from CPI forecasts
 │   ├── evaluation.py             # Scoring (MAE, RMSE, MAPE) and model selection
-│   ├── models.py                 # Model implementations: ARIMA, Linear Regression, Moving Average, ETS
+│   ├── models.py                 # Model implementations: ARIMA, Linear Regression, Moving Average
 │   └── run_pipeline.py           # Runs the full forecasting pipeline and saves outputs
 ├── data_pipeline/                # ETL scripts (preprocessing, loading, validation)
 │   ├── preprocess_cpi.py         # Cleans raw CPI Excel files into cpi_clean.csv
@@ -119,7 +119,7 @@ PresyoPH/
 | Regional comparison | `app/pages/regional.py` - `data.get_regional_comparison()` |
 | Reports generation | `app/pages/reports.py` - `build_report()`, 5 report builders |
 | Data explorer | `app/pages/data_explorer.py` - `queries.get_table()`, CSV download |
-| Forecast model training | `modeling/models.py` - `fit_arima()`, `fit_linear_regression()`, `fit_moving_average()`, `fit_ets()` |
+| Forecast model training | `modeling/models.py` - `fit_arima()`, `fit_linear_regression()`, `fit_moving_average()` |
 | Model selection | `modeling/evaluation.py` - `select_model()`, `select_final_model()` |
 | Inflation/purchasing power derivation | `modeling/derive.py` - `to_inflation()`, `to_purchasing_power()` |
 | Pipeline execution | `modeling/run_pipeline.py` - `run()` |
@@ -211,11 +211,9 @@ A: Install requirements with `pip install -r requirements.txt`, start MySQL in X
 
 ## 9. Known Issues / Incomplete Parts / Next Steps
 
-- **ETS model**: ETS is implemented and reported but is not eligible for selection (not in the original proposal). It becomes eligible only if the instructor approves.
 - **Database setup required**: The app needs MySQL running and the database imported before it will work. First-time users must follow the README setup steps.
 - **Forecast outputs must be generated**: `datasets/outputs/` must exist (run `python -m modeling.run_pipeline` first) before the Forecasts page works.
 - **No item-level prices**: Categories are PSA's 13 commodity groups only. Individual products (rice, cooking oil, etc.) are not in the dataset.
 - **FIES is 2023 only**: It's a snapshot and not updated monthly or forecast.
 - **Regional FIES by income group**: Not available; FIES regional data is shown separately from income-group data.
 - **Missing brand assets**: `app/ui/assets/logo.svg/png` and `sidebar_illustration.svg/png` are referenced but may not exist; the sidebar falls back to text if missing.
-- **Next steps**: Add ETS to eligible models (if approved), add more commodity detail, update FIES when newer data is available, add user accounts/preferences.

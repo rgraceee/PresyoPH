@@ -104,7 +104,6 @@ def run():
                                for name, r in final_results.items()},
         "notes": [
             "Only CPI is modeled. Inflation and purchasing power are derived from the CPI forecast.",
-            "ETS is not in the proposal and is reported for comparison only.",
             "The selection basis was changed from the main test to the pooled six origins after the results were seen.",
             "Forecasts rely only on historical CPI and do not account for external factors.",
         ],

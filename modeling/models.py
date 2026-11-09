@@ -1,4 +1,4 @@
-"""CPI forecasting models: ARIMA, Linear Regression, Moving Average, ETS."""
+"""CPI forecasting models: ARIMA, Linear Regression, Moving Average."""
 
 import itertools
 import warnings
@@ -9,7 +9,6 @@ import pandas as pd
 import statsmodels.api as sm
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 from statsmodels.tsa.arima.model import ARIMA
-from statsmodels.tsa.exponential_smoothing.ets import ETSModel
 
 from modeling import config
 
@@ -172,47 +171,10 @@ def fit_moving_average(train, horizon=config.HORIZON):
     )
 
 
-# --- ETS ---
-
-def fit_ets(train, horizon=config.HORIZON):
-    """ETS with additive trend, damped or not, chosen by AIC."""
-    rows, fits = [], []
-    for damped in config.ETS_DAMPED_OPTIONS:
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            fitted = ETSModel(train, error="add", trend="add", damped_trend=damped).fit(disp=False)
-        fits.append(fitted)
-        rows.append({
-            "damped_trend": damped,
-            "aic": fitted.aic,
-            "n_params": len(fitted.params),
-            "converged": not any(issubclass(w.category, ConvergenceWarning) for w in caught),
-        })
-
-    chosen, candidates = _select_by_aic(rows)
-    fitted, damped = fits[chosen], rows[chosen]["damped_trend"]
-
-    index = _future_index(train, horizon)
-    frame = fitted.get_prediction(start=index[0], end=index[-1]).summary_frame(alpha=_alpha())
-    params = {"damped_trend": damped, "aic": fitted.aic}
-    params.update({name: float(fitted.params[i]) for i, name in enumerate(fitted.param_names)
-                   if name in ("smoothing_level", "smoothing_trend", "damping_trend")})
-    return ForecastResult(
-        model="ETS",
-        forecast=pd.Series(frame["mean"].values, index=index),
-        lower=pd.Series(frame["pi_lower"].values, index=index),
-        upper=pd.Series(frame["pi_upper"].values, index=index),
-        params=params,
-        candidates=candidates,
-        fitted=fitted,
-    )
-
-
 MODELS = {
     "ARIMA": fit_arima,
     "Linear Regression": fit_linear_regression,
     "Moving Average": fit_moving_average,
-    "ETS": fit_ets,
 }
 
 

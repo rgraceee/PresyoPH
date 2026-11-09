@@ -82,10 +82,7 @@ def metrics_table(predictions, start=None, end=None):
 
 
 def eligible_models():
-    models = list(config.PROPOSAL_MODELS)
-    if config.ETS_ELIGIBLE_FOR_SELECTION:
-        models += config.EXTRA_MODELS
-    return models
+    return list(config.PROPOSAL_MODELS)
 
 
 def select_model(metrics, variable=config.SELECTION_VARIABLE, models=None):

@@ -151,7 +151,7 @@ def test_next_month_forecast():
 
 def test_pooled_metrics_support_the_selection():
     metrics = data.get_model_metrics("cpi")
-    assert len(metrics) == 4
+    assert len(metrics) == 3
     proposal = metrics[metrics["in_proposal"]]
     best = proposal.loc[proposal["rmse"].idxmin(), "model"]
     assert best == data.get_final_model()

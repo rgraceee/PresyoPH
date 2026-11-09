@@ -34,8 +34,9 @@ def _html(at):
 def test_page_renders_with_defaults(app):
     html = _html(app)
     assert "Cost-of-Living Forecasting and Model Comparison" in html
-    assert "Full Model Evaluation" in html
     assert "Projected 6-Month Change" in html
+    assert "Historical vs. Forecast: CPI" in html
+    assert "Forecast Results" in html
 
 
 @pytest.mark.parametrize("variable", list(theme.INDICATOR_NAMES))
@@ -48,14 +49,8 @@ def test_every_indicator_and_horizon(app, variable, horizon):
     assert f"Projected {horizon}-Month Change" in _html(app)
 
 
-def test_every_evaluation_period_and_metric(app):
-    period = app.selectbox[0]
-    for option in period.options:
-        for metric in ["rmse", "mae", "mape"]:
-            period.set_value(option)
-            _control(app, "Error measure", "button_group").set_value(metric)
-            app.run()
-            assert not app.exception, (option, metric, app.exception)
+def test_forecast_page_has_no_evaluation_selectboxes(app):
+    assert len(app.selectbox) == 0
 
 
 def test_show_other_models(app):
