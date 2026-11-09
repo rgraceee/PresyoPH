@@ -2,36 +2,14 @@ from pathlib import Path
 import pandas as pd
 
 
-# ==================================================
-# PRESYOPH - PROCESSED DATA VALIDATION
-# ==================================================
-# Purpose:
-# Perform final cross-dataset quality checks before
-# loading the cleaned datasets into SQLite.
-#
-# IMPORTANT:
-# This script DOES NOT modify any processed dataset.
-# ==================================================
-
-
-# --------------------------------------------------
-# STEP 1: PROJECT PATHS
-# --------------------------------------------------
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROCESSED_DIR = BASE_DIR / "datasets" / "processed"
 
 CPI_FILE = PROCESSED_DIR / "cpi_clean.csv"
 INFLATION_FILE = PROCESSED_DIR / "inflation_clean.csv"
-PURCHASING_POWER_FILE = (
-    PROCESSED_DIR / "purchasing_power_clean.csv"
-)
+PURCHASING_POWER_FILE = PROCESSED_DIR / "purchasing_power_clean.csv"
 FIES_FILE = PROCESSED_DIR / "fies_clean.csv"
 
-
-# --------------------------------------------------
-# STEP 2: CHECK FILES
-# --------------------------------------------------
 
 files = {
     "CPI": CPI_FILE,
@@ -65,10 +43,6 @@ if not all_files_found:
     )
 
 
-# --------------------------------------------------
-# STEP 3: LOAD PROCESSED DATASETS
-# --------------------------------------------------
-
 cpi = pd.read_csv(
     CPI_FILE,
     parse_dates=["date"]
@@ -92,10 +66,6 @@ fies = pd.read_csv(
 print("\nAll processed datasets loaded successfully.")
 
 
-# --------------------------------------------------
-# STEP 4: BASIC DATASET SUMMARY
-# --------------------------------------------------
-
 print("\n========================================")
 print("DATASET SUMMARY")
 print("========================================")
@@ -116,10 +86,6 @@ print("\nFIES")
 print("Rows:", len(fies))
 print("Columns:", list(fies.columns))
 
-
-# --------------------------------------------------
-# STEP 5: MISSING VALUE CHECK
-# --------------------------------------------------
 
 print("\n========================================")
 print("MISSING VALUE CHECK")
@@ -145,10 +111,6 @@ for name, df in datasets.items():
     if missing != 0:
         missing_pass = False
 
-
-# --------------------------------------------------
-# STEP 6: DUPLICATE OBSERVATION CHECK
-# --------------------------------------------------
 
 print("\n========================================")
 print("DUPLICATE CHECK")
@@ -190,10 +152,6 @@ duplicates_pass = (
 )
 
 
-# --------------------------------------------------
-# STEP 7: NUMERIC VALUE CHECK
-# --------------------------------------------------
-
 print("\n========================================")
 print("NUMERIC VALUE CHECK")
 print("========================================")
@@ -214,11 +172,6 @@ for name, df in datasets.items():
     if not is_numeric:
         numeric_pass = False
 
-
-# --------------------------------------------------
-# STEP 8: AREA CONSISTENCY
-# CPI vs INFLATION vs PURCHASING POWER
-# --------------------------------------------------
 
 print("\n========================================")
 print("AREA CONSISTENCY CHECK")
@@ -271,8 +224,6 @@ print(
 )
 
 
-# Show differences if any exist
-
 if not cpi_inflation_match:
 
     print("\nAreas only in CPI:")
@@ -305,10 +256,6 @@ area_pass = (
     and inflation_pp_match
 )
 
-
-# --------------------------------------------------
-# STEP 9: CPI / INFLATION CATEGORY CONSISTENCY
-# --------------------------------------------------
 
 print("\n========================================")
 print("CATEGORY CONSISTENCY CHECK")
@@ -360,10 +307,6 @@ if not category_match:
         )
     )
 
-
-# --------------------------------------------------
-# STEP 10: DATE RANGE CHECK
-# --------------------------------------------------
 
 print("\n========================================")
 print("DATE RANGE CHECK")
@@ -425,10 +368,6 @@ print(
 )
 
 
-# --------------------------------------------------
-# STEP 11: EXPECTED RECORD COUNTS
-# --------------------------------------------------
-
 print("\n========================================")
 print("RECORD COUNT CHECK")
 print("========================================")
@@ -472,10 +411,6 @@ record_count_pass = (
 )
 
 
-# --------------------------------------------------
-# STEP 12: NATIONAL RECORD CHECK
-# --------------------------------------------------
-
 print("\n========================================")
 print("NATIONAL RECORD CHECK")
 print("========================================")
@@ -517,10 +452,6 @@ national_pass = (
     and pp_national
 )
 
-
-# --------------------------------------------------
-# STEP 13: FIES AREA COMPARISON
-# --------------------------------------------------
 
 print("\n========================================")
 print("FIES AREA COMPARISON")
@@ -574,19 +505,6 @@ print(
 )
 
 
-# IMPORTANT:
-# FIES does not have to contain exactly the same
-# geographic coverage as CPI.
-#
-# Therefore, differences here are reported for
-# inspection but do NOT automatically fail the
-# overall validation.
-
-
-# --------------------------------------------------
-# STEP 14: FIES INDICATOR CHECK
-# --------------------------------------------------
-
 print("\n========================================")
 print("FIES INDICATOR CHECK")
 print("========================================")
@@ -618,10 +536,6 @@ print(
     fies_indicator_pass
 )
 
-
-# --------------------------------------------------
-# STEP 15: FINAL VALIDATION SUMMARY
-# --------------------------------------------------
 
 print("\n========================================")
 print("FINAL VALIDATION SUMMARY")

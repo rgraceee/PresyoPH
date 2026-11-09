@@ -1,33 +1,12 @@
-"""
-================================================================================
-FILE: app/pages/about.py
-================================================================================
-WHAT THIS FILE IS FOR:
-----------------------
-Supporting page: About / Methodology. Explains what PresyoPH is, where the
-data comes from, key definitions, the forecasting methodology, and limitations.
-
-================================================================================
-HOW IT CONNECTS TO OTHER FILES:
--------------------------------
-- app/streamlit_app.py: Registers this page as "about".
-- app/ui/shell.py: Calls shell.page_header().
-- app/ui/tokens.py: Calls tokens.PSA_ATTRIBUTION.
-- backend/data.py: Calls data.get_date_range(), data.get_model_info().
-
-================================================================================
-"""
-
 """Supporting page: About / Methodology."""
 
-import streamlit as st                                # streamlit: UI components
+import streamlit as st
 
-from app.ui import shell, tokens                      # shell: UI components; tokens: PSA attribution
-from backend import data                              # backend: data access functions
+from app.ui import shell, tokens
+from backend import data
 
 
 def render():
-    """Render the About / Methodology page."""
     shell.page_header("About PresyoPH", "Four PSA datasets in one place, so households, students, researchers, and planners "
                       "can see how the cost of living is changing and what may come next.")
 
@@ -54,7 +33,7 @@ def render():
 """)
 
     st.subheader("Methodology")
-    info = data.get_model_info()                       # Get model metadata
+    info = data.get_model_info()
     st.markdown(f"""
 - **Forecasting:** ARIMA, Linear Regression, and Moving Average were compared on national all-items CPI; the selected model is **{info['final_model']}**. Inflation and purchasing power forecasts are calculated from the CPI forecast using PSA's formulas, so all three variables are covered.
 - **Evaluation:** models were tested on months they had not seen, using MAE, RMSE, and MAPE. Details are on the Forecasts and Model Comparison page.
@@ -70,4 +49,4 @@ def render():
 """)
 
 
-render()                                               # Execute the page when Streamlit loads it
+render()

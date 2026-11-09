@@ -1,22 +1,7 @@
-"""PresyoPH database validation.
-
-Connects to presyoph_db and runs integrity checks:
-  1. Record counts
-  2. Duplicate observations
-  3. Foreign key references
-  4. Date ranges
-  5. NULL values
-  6. Lookup table usage
-
-Prints PASS/FAIL for each check and an overall result.
-"""
+"""PresyoPH database validation."""
 
 import mysql.connector
 
-
-# --------------------------------------------------
-# CONNECT
-# --------------------------------------------------
 
 connection = mysql.connector.connect(
     host="localhost",
@@ -28,26 +13,19 @@ cursor = connection.cursor()
 
 
 def count_rows(sql):
-    """Run a COUNT query and return the integer result."""
     cursor.execute(sql)
     return cursor.fetchone()[0]
 
 
 def section(title):
-    """Print a section header."""
     print(f"\n{title}")
     print("=" * len(title))
 
 
 def check_result(label, passed):
-    """Print PASS/FAIL for one check."""
     print(f"{label}: {'PASS' if passed else 'FAIL'}")
     return passed
 
-
-# ==================================================
-# 1. RECORD COUNT CHECK
-# ==================================================
 
 section("PRESYOPH DATABASE VALIDATION")
 section("1. RECORD COUNT CHECK")
@@ -69,9 +47,6 @@ for table, expected in expected_counts.items():
     if actual != expected:
         count_pass = False
 
-# ==================================================
-# 2-5. DUPLICATE CHECKS
-# ==================================================
 
 section("2. DUPLICATE CHECK")
 
@@ -108,9 +83,6 @@ for name, cnt in dup_results.items():
 
 duplicate_pass = all(c == 0 for c in dup_results.values())
 
-# ==================================================
-# 6. FOREIGN KEY CHECK
-# ==================================================
 
 section("6. FOREIGN KEY REFERENCE CHECK")
 
@@ -143,13 +115,9 @@ for label, cnt in fk_results.items():
 
 foreign_key_pass = all(c == 0 for c in fk_results.values())
 
-# ==================================================
-# 7. DATE RANGE CHECK
-# ==================================================
 
 section("7. DATE RANGE CHECK")
 
-cpi_min, cpi_max = count_rows("SELECT MIN(date) FROM cpi"), None
 cursor.execute("SELECT MIN(date), MAX(date) FROM cpi")
 cpi_min, cpi_max = cursor.fetchone()
 cursor.execute("SELECT MIN(date), MAX(date) FROM inflation")
@@ -171,9 +139,6 @@ date_pass = (
     and fies_min == 2023 and fies_max == 2023
 )
 
-# ==================================================
-# 8. NULL VALUE CHECK
-# ==================================================
 
 section("8. NULL VALUE CHECK")
 
@@ -207,9 +172,6 @@ for name, query in null_queries.items():
     if count != 0:
         null_pass = False
 
-# ==================================================
-# 9. LOOKUP TABLE CHECK
-# ==================================================
 
 section("9. LOOKUP TABLE CHECK")
 
@@ -233,9 +195,6 @@ lookup_pass = (
     and lookup_results["Purchasing Power areas used"] == 120
 )
 
-# ==================================================
-# 10. FINAL VALIDATION SUMMARY
-# ==================================================
 
 section("10. FINAL VALIDATION SUMMARY")
 

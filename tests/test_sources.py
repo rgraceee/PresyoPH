@@ -1,7 +1,4 @@
-"""Tests for backend/sources.py. Run with:  .venv/Scripts/python -m pytest
-
-They need MySQL running with presyoph_db imported (see README.md).
-"""
+"""Tests for backend/sources.py."""
 
 import pandas as pd
 import pytest
@@ -46,6 +43,6 @@ def test_series_rejects_unknown_arguments(call):
 
 
 def test_unreachable_database_gives_setup_hint(monkeypatch):
-    monkeypatch.setenv("DB_PORT", "1")  # nothing listens on port 1
+    monkeypatch.setenv("DB_PORT", "1")
     with pytest.raises(ConnectionError, match="XAMPP"):
         sources._query("SELECT 1", ["one"])

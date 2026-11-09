@@ -1,9 +1,4 @@
-"""Tests for backend/data.py. Run with:  .venv/Scripts/python -m pytest
-
-They need MySQL running with presyoph_db imported (see README.md), and they
-read datasets/outputs/, so run the pipeline (`python -m modeling.run_pipeline`)
-first.
-"""
+"""Tests for backend/data.py."""
 
 import pandas as pd
 import pytest
@@ -13,8 +8,6 @@ from backend import data
 LAST_MONTH = pd.Timestamp("2026-08-01")
 NCR = "National Capital Region (NCR)"
 
-
-# --- Historical series -----------------------------------------------------------
 
 def test_national_cpi_covers_full_period():
     cpi = data.get_cpi()
@@ -70,8 +63,6 @@ def test_invalid_arguments_raise_value_error(call):
         call()
 
 
-# --- Summaries -------------------------------------------------------------------
-
 def test_lists_for_filters():
     assert len(data.list_areas("region")) == 18
     assert data.list_areas("national") == ["PHILIPPINES"]
@@ -119,8 +110,6 @@ def test_regional_comparison(indicator):
     assert (table["value"] - national - table["difference_from_national"]).abs().max() < 1e-9
 
 
-# --- FIES ------------------------------------------------------------------------
-
 def test_fies_by_decile():
     table = data.get_fies_by_decile()
     assert len(table) == 11
@@ -133,8 +122,6 @@ def test_fies_by_region_uses_cpi_region_names():
     assert table["area"].tolist() == data.list_areas("region")
     assert (table["savings_rate"] > 0).all()
 
-
-# --- Forecasts and model results -------------------------------------------------
 
 @pytest.mark.parametrize("horizon", [3, 6, 12])
 @pytest.mark.parametrize("variable", data.INDICATORS)

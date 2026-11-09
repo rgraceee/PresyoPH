@@ -1,22 +1,8 @@
-"""Preprocess raw CPI Excel files into one cleaned CSV.
-
-Reads CPI_1.xlsx, CPI_2.xlsx and CPI_3.xlsx from datasets/raw/,
-converts each from wide format (months as columns) to long format
-(date, area, category, value, base_year), then merges them into
-datasets/processed/cpi_clean.csv.
-
-CPI_3 already covers 2023, so only CPI_2's 2022 rows are kept to avoid
-duplicating 2023 observations.
-"""
+"""Preprocess raw CPI Excel files into one cleaned CSV."""
 
 from pathlib import Path
 
 import pandas as pd
-
-
-# --------------------------------------------------
-# PROJECT PATHS
-# --------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 RAW_DIR = BASE_DIR / "datasets" / "raw"
@@ -25,36 +11,12 @@ PROCESSED_DIR = BASE_DIR / "datasets" / "processed"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# --------------------------------------------------
-# REUSABLE CPI FILE PARSER
-# --------------------------------------------------
-
 def read_cpi_file(path, expected_months):
-    """Parse one raw CPI Excel file into a long DataFrame.
-
-    Parameters
-    ----------
-    path : Path
-        Excel file to read (no header row).
-    expected_months : int
-        How many monthly columns each area/category should have,
-        used only for the validation message.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Columns: date, area, category, value, base_year.
-    """
     raw = pd.read_excel(path, header=None)
 
-    # Observation rows start after the 4 header rows.
     data = raw.iloc[4:1684].copy()
-
-    # PSA repeats area names only on the first row of each block;
-    # forward-fill so every row knows its area.
     data[0] = data[0].ffill()
 
-    # Row 2 = year, row 3 = period (e.g. "Jan"). Skip "Ave" columns.
     years = raw.iloc[2].ffill()
     periods = raw.iloc[3]
 
@@ -69,7 +31,6 @@ def read_cpi_file(path, expected_months):
                 "month": period,
             })
 
-    # Convert wide layout to one row per (date, area, category).
     records = []
     for item in monthly_columns:
         col = item["column"]
@@ -86,7 +47,6 @@ def read_cpi_file(path, expected_months):
     long_df = pd.DataFrame(records)
     long_df["value"] = pd.to_numeric(long_df["value"], errors="coerce")
 
-    # Validation summary.
     obs_rows = len(data)
     actual_rows = len(long_df)
     duplicates = long_df.duplicated(subset=["date", "area", "category"]).sum()
@@ -106,10 +66,6 @@ def read_cpi_file(path, expected_months):
 
     return long_df
 
-
-# --------------------------------------------------
-# LOAD AND VALIDATE EACH CPI FILE
-# --------------------------------------------------
 
 cpi1_long = read_cpi_file(RAW_DIR / "CPI_1.xlsx", expected_months=48)
 cpi2_long = read_cpi_file(RAW_DIR / "CPI_2.xlsx", expected_months=24)
@@ -141,7 +97,6 @@ for item in monthly_columns3:
         })
 
 cpi3_long = pd.DataFrame(records3)
-# Remove unavailable PSA values such as "..".
 cpi3_long = cpi3_long.dropna(subset=["value"]).copy()
 
 duplicates3 = cpi3_long.duplicated(subset=["date", "area", "category"]).sum()
@@ -163,21 +118,11 @@ print("Expected valid rows:", expected_rows3)
 print("Actual valid rows:", len(cpi3_long))
 
 
-# --------------------------------------------------
-# MERGE COMPLETE CPI DATASET
-# --------------------------------------------------
-
-# CPI_3 already contains 2023, so keep only 2022 from CPI_2 to avoid
-# duplicating 2023 observations.
 cpi2_2022 = cpi2_long[cpi2_long["date"].dt.year == 2022].copy()
 
 cpi_clean = pd.concat([cpi1_long, cpi2_2022, cpi3_long], ignore_index=True)
 cpi_clean = cpi_clean.sort_values(by=["date", "area", "category"]).reset_index(drop=True)
 
-
-# --------------------------------------------------
-# VALIDATE COMPLETE CPI
-# --------------------------------------------------
 
 final_duplicates = cpi_clean.duplicated(subset=["date", "area", "category"]).sum()
 total_months = cpi_clean["date"].nunique()
@@ -214,10 +159,6 @@ print("Expected total rows:", expected_final_rows)
 print("Actual total rows:", len(cpi_clean))
 print("COMPLETE CPI VALIDATION PASSED:", final_validation_passed)
 
-
-# --------------------------------------------------
-# SAVE CLEANED CPI
-# --------------------------------------------------
 
 if final_validation_passed:
     cpi_output = PROCESSED_DIR / "cpi_clean.csv"

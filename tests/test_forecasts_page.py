@@ -1,9 +1,4 @@
-"""Tests for the Forecasting screen (app/pages/forecasts.py).
-
-Uses Streamlit's AppTest to run the real page without a browser, then
-switches every control and checks that the page renders without errors.
-The page is loaded directly, so the app's default page does not matter.
-"""
+"""Tests for the Forecasting screen."""
 
 from pathlib import Path
 
@@ -16,7 +11,7 @@ from app.components import forecast_charts as charts
 from backend import data
 
 PAGE = str(Path(__file__).resolve().parents[1] / "app" / "pages" / "forecasts.py")
-TIMEOUT = 120  # the first run reads the raw Excel files
+TIMEOUT = 120
 
 
 @pytest.fixture(scope="module")
@@ -33,7 +28,6 @@ def _control(at, label, kind="segmented_control"):
 
 
 def _html(at):
-    """All the page's HTML blocks; the screen draws its headers and stats with st.markdown."""
     return "\n".join(m.value for m in at.markdown)
 
 
@@ -41,7 +35,7 @@ def test_page_renders_with_defaults(app):
     html = _html(app)
     assert "Cost-of-Living Forecasting and Model Comparison" in html
     assert "Full Model Evaluation" in html
-    assert "Projected 6-Month Change" in html  # default horizon is 6 months
+    assert "Projected 6-Month Change" in html
 
 
 @pytest.mark.parametrize("variable", list(theme.INDICATOR_NAMES))
@@ -70,15 +64,12 @@ def test_show_other_models(app):
     assert not app.exception, app.exception
 
 
-# --- Chart builders --------------------------------------------------------------
-
 def test_forecast_figure_has_history_forecast_and_band():
     forecast = data.get_forecast("cpi", 12)
     history = data.get_cpi(start="2024-01")
     fig = charts.forecast_figure(history, forecast, "cpi", "ARIMA")
     names = [t.name for t in fig.data]
     assert "Actual (PSA)" in names and "Forecast (ARIMA)" in names and "95% prediction interval" in names
-    # The forecast line starts at the last actual point so the line is continuous.
     forecast_trace = next(t for t in fig.data if t.name == "Forecast (ARIMA)")
     assert pd.Timestamp(forecast_trace.x[0]) == history["date"].iloc[-1]
 
@@ -90,7 +81,6 @@ def test_model_comparison_colours_each_model():
     selected_label = next(l for l in bar.y if l.startswith(data.get_final_model()))
     index = list(bar.y).index(selected_label)
     assert bar.marker.color[index] == theme.MODEL_COLORS[data.get_final_model()]
-    # Lowest error is drawn at the top (last bar in a horizontal chart).
     assert bar.x[-1] == min(bar.x)
 
 

@@ -4,19 +4,11 @@ import pandas as pd
 import mysql.connector
 
 
-# ==========================================
-# PROJECT PATH
-# ==========================================
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROCESSED_DIR = BASE_DIR / "datasets" / "processed"
 
 CPI_FILE = PROCESSED_DIR / "cpi_clean.csv"
 
-
-# ==========================================
-# CONNECT TO MYSQL
-# ==========================================
 
 connection = mysql.connector.connect(
     host="localhost",
@@ -31,10 +23,6 @@ print("PRESYOPH CPI CSV <-> MYSQL DIAGNOSIS")
 print("========================================")
 
 
-# ==========================================
-# LOAD CPI FROM CSV
-# ==========================================
-
 print("\nLoading CPI CSV...")
 
 cpi_csv = pd.read_csv(
@@ -45,10 +33,6 @@ cpi_csv = pd.read_csv(
 print("CPI CSV loaded.")
 print("Rows:", len(cpi_csv))
 
-
-# ==========================================
-# LOAD CPI FROM MYSQL
-# ==========================================
 
 print("\nLoading CPI from MySQL...")
 
@@ -73,70 +57,30 @@ print("CPI MySQL data loaded.")
 print("Rows:", len(cpi_sql))
 
 
-# ==========================================
-# STANDARDIZE DATA TYPES
-# ==========================================
+cpi_csv["date"] = pd.to_datetime(cpi_csv["date"])
 
-cpi_csv["date"] = pd.to_datetime(
-    cpi_csv["date"]
-)
-
-cpi_sql["date"] = pd.to_datetime(
-    cpi_sql["date"]
-)
+cpi_sql["date"] = pd.to_datetime(cpi_sql["date"])
 
 
-cpi_csv["area"] = (
-    cpi_csv["area"]
-    .astype(str)
-    .str.strip()
-)
+cpi_csv["area"] = cpi_csv["area"].astype(str).str.strip()
 
-cpi_sql["area"] = (
-    cpi_sql["area"]
-    .astype(str)
-    .str.strip()
-)
+cpi_sql["area"] = cpi_sql["area"].astype(str).str.strip()
 
 
-cpi_csv["category"] = (
-    cpi_csv["category"]
-    .astype(str)
-    .str.strip()
-)
+cpi_csv["category"] = cpi_csv["category"].astype(str).str.strip()
 
-cpi_sql["category"] = (
-    cpi_sql["category"]
-    .astype(str)
-    .str.strip()
-)
+cpi_sql["category"] = cpi_sql["category"].astype(str).str.strip()
 
 
-cpi_csv["value"] = (
-    cpi_csv["value"]
-    .astype(float)
-)
+cpi_csv["value"] = cpi_csv["value"].astype(float)
 
-cpi_sql["value"] = (
-    cpi_sql["value"]
-    .astype(float)
-)
+cpi_sql["value"] = cpi_sql["value"].astype(float)
 
 
-cpi_csv["base_year"] = (
-    cpi_csv["base_year"]
-    .astype(int)
-)
+cpi_csv["base_year"] = cpi_csv["base_year"].astype(int)
 
-cpi_sql["base_year"] = (
-    cpi_sql["base_year"]
-    .astype(int)
-)
+cpi_sql["base_year"] = cpi_sql["base_year"].astype(int)
 
-
-# ==========================================
-# SORT BOTH DATASETS
-# ==========================================
 
 sort_columns = [
     "date",
@@ -157,10 +101,6 @@ cpi_sql = (
 )
 
 
-# ==========================================
-# SHOW DATA TYPES
-# ==========================================
-
 print("\n========================================")
 print("DATA TYPE CHECK")
 print("========================================")
@@ -171,10 +111,6 @@ print(cpi_csv.dtypes)
 print("\nMySQL data types:")
 print(cpi_sql.dtypes)
 
-
-# ==========================================
-# CHECK ROW COUNTS
-# ==========================================
 
 print("\n========================================")
 print("ROW COUNT CHECK")
@@ -196,16 +132,10 @@ else:
     print("Row count: FAIL")
 
 
-# ==========================================
-# COMPARE EACH COLUMN
-# ==========================================
-
 print("\n========================================")
 print("COLUMN-BY-COLUMN COMPARISON")
 print("========================================")
 
-
-# DATE
 
 date_diff = (
     cpi_csv["date"]
@@ -219,8 +149,6 @@ print(
 )
 
 
-# AREA
-
 area_diff = (
     cpi_csv["area"]
     != cpi_sql["area"]
@@ -233,8 +161,6 @@ print(
 )
 
 
-# CATEGORY
-
 category_diff = (
     cpi_csv["category"]
     != cpi_sql["category"]
@@ -246,9 +172,6 @@ print(
     "differences"
 )
 
-
-# VALUE
-# Small tolerance is used for decimal/float comparison.
 
 value_difference = (
     cpi_csv["value"]
@@ -266,8 +189,6 @@ print(
 )
 
 
-# BASE YEAR
-
 base_year_diff = (
     cpi_csv["base_year"]
     != cpi_sql["base_year"]
@@ -280,10 +201,6 @@ print(
 )
 
 
-# ==========================================
-# SHOW FIRST VALUE DIFFERENCES
-# ==========================================
-
 if value_diff.sum() > 0:
 
     print("\n========================================")
@@ -291,60 +208,26 @@ if value_diff.sum() > 0:
     print("========================================")
 
     value_comparison = pd.DataFrame({
-        "date": cpi_csv.loc[
-            value_diff,
-            "date"
-        ],
-
-        "area": cpi_csv.loc[
-            value_diff,
-            "area"
-        ],
-
-        "category": cpi_csv.loc[
-            value_diff,
-            "category"
-        ],
-
-        "CSV_value": cpi_csv.loc[
-            value_diff,
-            "value"
-        ],
-
-        "MySQL_value": cpi_sql.loc[
-            value_diff,
-            "value"
-        ],
-
-        "difference": value_difference.loc[
-            value_diff
-        ]
+        "date": cpi_csv.loc[value_diff, "date"],
+        "area": cpi_csv.loc[value_diff, "area"],
+        "category": cpi_csv.loc[value_diff, "category"],
+        "CSV_value": cpi_csv.loc[value_diff, "value"],
+        "MySQL_value": cpi_sql.loc[value_diff, "value"],
+        "difference": value_difference.loc[value_diff]
     })
 
     print(
-        value_comparison.head(10).to_string(
-            index=False
-        )
+        value_comparison.head(10).to_string(index=False)
     )
 
-
-# ==========================================
-# SHOW TEXT DIFFERENCES IF ANY
-# ==========================================
 
 if area_diff.sum() > 0:
 
     print("\nFirst 5 AREA differences:")
 
     area_comparison = pd.DataFrame({
-        "CSV": cpi_csv.loc[
-            area_diff,
-            "area"
-        ],
-        "MySQL": cpi_sql.loc[
-            area_diff,
-            "area"
-        ]
+        "CSV": cpi_csv.loc[area_diff, "area"],
+        "MySQL": cpi_sql.loc[area_diff, "area"]
     })
 
     print(
@@ -357,24 +240,14 @@ if category_diff.sum() > 0:
     print("\nFirst 5 CATEGORY differences:")
 
     category_comparison = pd.DataFrame({
-        "CSV": cpi_csv.loc[
-            category_diff,
-            "category"
-        ],
-        "MySQL": cpi_sql.loc[
-            category_diff,
-            "category"
-        ]
+        "CSV": cpi_csv.loc[category_diff, "category"],
+        "MySQL": cpi_sql.loc[category_diff, "category"]
     })
 
     print(
         category_comparison.head(5).to_string()
     )
 
-
-# ==========================================
-# FINAL CPI RESULT
-# ==========================================
 
 print("\n========================================")
 print("CPI DIAGNOSIS RESULT")
@@ -405,10 +278,6 @@ else:
         "column has differences."
     )
 
-
-# ==========================================
-# CLOSE DATABASE CONNECTION
-# ==========================================
 
 connection.close()
 

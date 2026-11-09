@@ -1,51 +1,7 @@
-"""
-================================================================================
-FILE: data_pipeline/preprocess_fies.py
-================================================================================
-WHAT THIS FILE IS FOR:
-----------------------
-Preprocesses the raw FIES.csv file from datasets/raw/ into a cleaned CSV
-at datasets/processed/fies_clean.csv.
-
-The FIES (Family Income and Expenditure Survey) is a 2023 snapshot showing
-how much Filipino families earn, spend, and save across 10 income deciles.
-It is NOT a monthly time series and is NOT forecast.
-
-Steps:
-  1. Check the raw FIES.csv file exists
-  2. Read the raw CSV (with encoding fallback)
-  3. Select relevant columns (area, income group, indicator, value)
-  4. Rename columns to standard names
-  5. Standardize area names (remove PSA leading dots)
-  6. Standardize income group names
-  7. Standardize indicator names (remove unit text)
-  8. Convert values to numeric
-  9. Add year (2023) and unit columns
-  10. Reorder columns
-  11. Sort data
-  12-17. Validate: row counts, missing values, duplicates, indicators, year, units
-  18. Preview cleaned data
-  19. Export to fies_clean.csv if validation passes
-
-================================================================================
-HOW IT CONNECTS TO OTHER FILES:
--------------------------------
-- datasets/raw/FIES.csv: Input file (raw PSA FIES data).
-- datasets/processed/fies_clean.csv: Output file (cleaned FIES data).
-- data_pipeline/load_database.py: Loads fies_clean.csv into the MySQL fies table.
-- backend/sources.py: Reads from the MySQL fies table via fies_table().
-- backend/data.py: Provides get_fies(), get_fies_by_decile(), get_fies_by_region().
-
-================================================================================
-"""
+"""Preprocess the raw FIES.csv file into a cleaned CSV."""
 
 from pathlib import Path
 import pandas as pd
-
-
-# ==================================================
-# PRESYOPH - FIES PREPROCESSING
-# ==================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -56,10 +12,6 @@ PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 FIES_FILE = RAW_DIR / "FIES.csv"
 
-
-# --------------------------------------------------
-# STEP 1: CHECK RAW FILE
-# --------------------------------------------------
 
 print("\n========================================")
 print("PRESYOPH - FIES PREPROCESSING")
@@ -72,10 +24,6 @@ if not FIES_FILE.exists():
 
 print("\nFIES.csv -> FOUND")
 
-
-# --------------------------------------------------
-# STEP 2: READ RAW FIES
-# --------------------------------------------------
 
 try:
     fies_raw = pd.read_csv(
@@ -96,10 +44,6 @@ print("Rows:", len(fies_raw))
 print("Columns:", len(fies_raw.columns))
 
 
-# --------------------------------------------------
-# STEP 3: SELECT RELEVANT COLUMNS
-# --------------------------------------------------
-
 fies_clean = fies_raw[
     [
         "Region, Province, and HUC",
@@ -109,10 +53,6 @@ fies_clean = fies_raw[
     ]
 ].copy()
 
-
-# --------------------------------------------------
-# STEP 4: RENAME COLUMNS
-# --------------------------------------------------
 
 fies_clean = fies_clean.rename(
     columns={
@@ -124,16 +64,6 @@ fies_clean = fies_clean.rename(
 )
 
 
-# --------------------------------------------------
-# STEP 5: STANDARDIZE AREA NAMES
-# --------------------------------------------------
-
-# PSA uses leading dots to show geographic hierarchy.
-# Example:
-# "..City of Angeles" -> "City of Angeles"
-#
-# Remove only leading dots, then remove surrounding spaces.
-
 fies_clean["area"] = (
     fies_clean["area"]
     .astype("string")
@@ -142,10 +72,6 @@ fies_clean["area"] = (
 )
 
 
-# --------------------------------------------------
-# STEP 6: STANDARDIZE INCOME GROUP
-# --------------------------------------------------
-
 fies_clean["income_group"] = (
     fies_clean["income_group"]
     .astype("string")
@@ -153,13 +79,6 @@ fies_clean["income_group"] = (
     .str.replace(r"\s+", " ", regex=True)
 )
 
-
-# --------------------------------------------------
-# STEP 7: STANDARDIZE INDICATOR
-# --------------------------------------------------
-
-# Remove the unit text from the indicator because
-# the unit will have its own column.
 
 fies_clean["indicator"] = (
     fies_clean["indicator"]
@@ -174,30 +93,16 @@ fies_clean["indicator"] = (
 )
 
 
-# --------------------------------------------------
-# STEP 8: CONVERT VALUE TO NUMERIC
-# --------------------------------------------------
-
 fies_clean["value"] = pd.to_numeric(
     fies_clean["value"],
     errors="coerce"
 )
 
 
-# --------------------------------------------------
-# STEP 9: ADD YEAR AND UNIT
-# --------------------------------------------------
-
-# This dataset is the 2023 FIES snapshot.
-
 fies_clean["year"] = 2023
 
 fies_clean["unit"] = "thousand_pesos"
 
-
-# --------------------------------------------------
-# STEP 10: REORDER COLUMNS
-# --------------------------------------------------
 
 fies_clean = fies_clean[
     [
@@ -211,10 +116,6 @@ fies_clean = fies_clean[
 ]
 
 
-# --------------------------------------------------
-# STEP 11: SORT DATA
-# --------------------------------------------------
-
 fies_clean = fies_clean.sort_values(
     by=[
         "area",
@@ -223,10 +124,6 @@ fies_clean = fies_clean.sort_values(
     ]
 ).reset_index(drop=True)
 
-
-# --------------------------------------------------
-# STEP 12: VALIDATE FIES
-# --------------------------------------------------
 
 print("\n========================================")
 print("FIES VALIDATION")
@@ -239,14 +136,12 @@ print("\nTotal cleaned rows:")
 print(len(fies_clean))
 
 
-# Missing values
 print("\nMissing values:")
 print(
     fies_clean.isna().sum()
 )
 
 
-# Duplicate observations
 duplicates = fies_clean.duplicated(
     subset=[
         "year",
@@ -260,14 +155,12 @@ print("\nDuplicate observations:")
 print(duplicates)
 
 
-# Areas
 print("\nUnique areas:")
 print(
     fies_clean["area"].nunique()
 )
 
 
-# Income groups
 print("\nIncome groups:")
 
 income_groups = sorted(
@@ -280,7 +173,6 @@ for group in income_groups:
     print("-", group)
 
 
-# Indicators
 print("\nIndicators:")
 
 indicator_counts = (
@@ -290,10 +182,6 @@ indicator_counts = (
 
 print(indicator_counts)
 
-
-# --------------------------------------------------
-# STEP 13: CHECK EXPECTED INDICATORS
-# --------------------------------------------------
 
 expected_indicators = {
     "Average Income",
@@ -317,10 +205,6 @@ print(
 )
 
 
-# --------------------------------------------------
-# STEP 14: CHECK YEAR
-# --------------------------------------------------
-
 years_correct = (
     set(fies_clean["year"].unique()) == {2023}
 )
@@ -330,10 +214,6 @@ print(
     years_correct
 )
 
-
-# --------------------------------------------------
-# STEP 15: CHECK UNIT
-# --------------------------------------------------
 
 units_correct = (
     set(fies_clean["unit"].unique())
@@ -346,20 +226,12 @@ print(
 )
 
 
-# --------------------------------------------------
-# STEP 16: CHECK VALUE RANGE
-# --------------------------------------------------
-
 print("\nMinimum value:")
 print(fies_clean["value"].min())
 
 print("\nMaximum value:")
 print(fies_clean["value"].max())
 
-
-# --------------------------------------------------
-# STEP 17: FINAL VALIDATION
-# --------------------------------------------------
 
 validation_passed = (
     len(fies_clean) == len(fies_raw)
@@ -377,10 +249,6 @@ print(
 )
 
 
-# --------------------------------------------------
-# STEP 18: PREVIEW CLEANED DATA
-# --------------------------------------------------
-
 print("\n--- CLEANED FIES PREVIEW ---")
 
 print(
@@ -389,10 +257,6 @@ print(
     .to_string(index=False)
 )
 
-
-# --------------------------------------------------
-# STEP 19: EXPORT
-# --------------------------------------------------
 
 if validation_passed:
 

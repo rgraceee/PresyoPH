@@ -1,12 +1,4 @@
-"""Loads cleaned CSVs from datasets/processed/ into presyoph_db.
-
-Run database/schema.sql first. Inserts use INSERT IGNORE, so rows that
-already exist are skipped, not updated. To refresh the data, drop and
-recreate the database, then load.
-
-Uses the same connection settings as backend/sources.py (XAMPP defaults:
-localhost:3306, root, no password).
-"""
+"""Loads cleaned CSVs from datasets/processed/ into presyoph_db."""
 
 import os
 from pathlib import Path
@@ -14,10 +6,6 @@ from pathlib import Path
 import pandas as pd
 import mysql.connector
 
-
-# --------------------------------------------------
-# PROJECT PATHS
-# --------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROCESSED_DIR = BASE_DIR / "datasets" / "processed"
@@ -29,10 +17,6 @@ FIES_FILE = PROCESSED_DIR / "fies_clean.csv"
 
 BATCH_SIZE = 5000
 
-
-# --------------------------------------------------
-# CONNECT TO MYSQL
-# --------------------------------------------------
 
 connection = mysql.connector.connect(
     host=os.getenv("DB_HOST", "localhost"),
@@ -47,24 +31,7 @@ cursor = connection.cursor()
 print("Successfully connected to PresyoPH MySQL database.")
 
 
-# --------------------------------------------------
-# REUSABLE LOADERS
-# --------------------------------------------------
-
 def load_lookup_table(df_column, table_name, column_name, label):
-    """Insert unique values from a dataframe column into a lookup table.
-
-    Parameters
-    ----------
-    df_column : pandas.Series
-        Values to insert.
-    table_name : str
-        Database table name.
-    column_name : str
-        Column to insert into.
-    label : str
-        Human-readable name for progress messages.
-    """
     values = sorted(df_column.unique())
     sql = f"INSERT IGNORE INTO {table_name} ({column_name}) VALUES (%s)"
     cursor.executemany(sql, [(v,) for v in values])
@@ -75,17 +42,6 @@ def load_lookup_table(df_column, table_name, column_name, label):
 
 
 def load_data_records(records, sql, table_label):
-    """Insert rows in batches and print progress.
-
-    Parameters
-    ----------
-    records : list of tuples
-        Row data to insert.
-    sql : str
-        INSERT statement with %s placeholders.
-    table_label : str
-        Human-readable name for progress messages.
-    """
     print(f"\nLoading {table_label} data into MySQL...")
     for start in range(0, len(records), BATCH_SIZE):
         batch = records[start:start + BATCH_SIZE]
@@ -95,10 +51,6 @@ def load_data_records(records, sql, table_label):
         print(f"{table_label} progress: {loaded}/{len(records)}")
     print(f"\n{table_label} data loaded successfully.")
 
-
-# --------------------------------------------------
-# AREAS AND CATEGORIES (from CPI data)
-# --------------------------------------------------
 
 cpi = pd.read_csv(CPI_FILE)
 print("\nCPI dataset loaded.")
@@ -115,10 +67,6 @@ category_map = {name: cid for cid, name in cursor.fetchall()}
 
 print("\nArea and category ID mappings created.")
 
-
-# --------------------------------------------------
-# CPI DATA
-# --------------------------------------------------
 
 cpi["area_id"] = cpi["area"].map(area_map)
 cpi["category_id"] = cpi["category"].map(category_map)
@@ -141,10 +89,6 @@ VALUES (%s, %s, %s, %s, %s)
 """
 load_data_records(cpi_records, cpi_sql, "CPI")
 
-
-# --------------------------------------------------
-# INFLATION DATA
-# --------------------------------------------------
 
 inflation = pd.read_csv(INFLATION_FILE)
 print("\nInflation dataset loaded.")
@@ -174,10 +118,6 @@ VALUES (%s, %s, %s, %s, %s)
 load_data_records(inflation_records, inflation_sql, "Inflation")
 
 
-# --------------------------------------------------
-# PURCHASING POWER DATA
-# --------------------------------------------------
-
 purchasing_power = pd.read_csv(PURCHASING_POWER_FILE)
 print("\nPurchasing Power dataset loaded.")
 print("Rows:", len(purchasing_power))
@@ -202,10 +142,6 @@ VALUES (%s, %s, %s, %s, %s)
 load_data_records(pp_records, pp_sql, "Purchasing Power")
 
 
-# --------------------------------------------------
-# FIES DATA
-# --------------------------------------------------
-
 fies = pd.read_csv(FIES_FILE)
 print("\nFIES dataset loaded.")
 print("Rows:", len(fies))
@@ -223,10 +159,6 @@ VALUES (%s, %s, %s, %s, %s, %s)
 """
 load_data_records(fies_records, fies_sql, "FIES")
 
-
-# --------------------------------------------------
-# VERIFY DATABASE COUNTS
-# --------------------------------------------------
 
 cursor.execute("SELECT COUNT(*) FROM areas")
 area_count = cursor.fetchone()[0]
@@ -251,10 +183,6 @@ print("Inflation records in database:", inflation_count)
 print("Purchasing Power records in database:", purchasing_power_count)
 print("FIES records in database:", fies_count)
 
-
-# --------------------------------------------------
-# CLOSE CONNECTION
-# --------------------------------------------------
 
 cursor.close()
 connection.close()

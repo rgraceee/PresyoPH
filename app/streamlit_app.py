@@ -1,15 +1,8 @@
-"""PresyoPH dashboard entry point.
-
-    .venv/Scripts/python -m streamlit run app/streamlit_app.py
-
-Registers every screen and wraps them in the shared shell (sidebar, search
-bar, footer) from app/ui/. Screens live in app/pages/.
-"""
+"""PresyoPH dashboard entry point."""
 
 import sys
 from pathlib import Path
 
-# Make `app`, `backend`, and `modeling` importable when Streamlit runs this file.
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -22,14 +15,13 @@ st.set_page_config(page_title="PresyoPH", page_icon=":material/monitoring:", lay
 
 DEFAULT_PAGE = "home"
 
-# key, file, sidebar title, icon, URL path. The first six follow the Figma sidebar.
 SCREENS = [
     ("home", "pages/dashboard.py", "Dashboard", ":material/home:", "dashboard"),
     ("trends", "pages/trends.py", "Price Trends", ":material/trending_up:", "price-trends"),
     ("categories", "pages/categories.py", "Household Necessities", ":material/shopping_basket:", "household-necessities"),
     ("finances", "pages/finances.py", "Purchasing Power", ":material/account_balance_wallet:", "purchasing-power"),
     ("regional", "pages/regional.py", "Household Analysis", ":material/groups:", "household-analysis"),
-    ("forecasting", "pages/forecasts.py", "Forecasting",":material/calendar_month:", "forecasting"),
+    ("forecasting", "pages/forecasts.py", "Forecasting", ":material/calendar_month:", "forecasting"),
     ("reports", "pages/reports.py", "Reports", ":material/description:", "reports"),
     ("explorer", "pages/data_explorer.py", "Data Explorer", ":material/table_chart:", "data-explorer"),
     ("about", "pages/about.py", "About / Methodology", ":material/info:", "about"),

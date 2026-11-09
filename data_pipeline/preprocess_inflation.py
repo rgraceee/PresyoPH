@@ -1,19 +1,8 @@
-"""Preprocess raw Inflation Excel files into one cleaned CSV.
-
-Reads Inflation_1.xlsx and Inflation_2.xlsx from datasets/raw/,
-converts each from wide format (months as columns) to long format
-(date, area, category, value, unit), then merges them into
-datasets/processed/inflation_clean.csv.
-"""
+"""Preprocess raw Inflation Excel files into one cleaned CSV."""
 
 from pathlib import Path
 
 import pandas as pd
-
-
-# --------------------------------------------------
-# PROJECT PATHS
-# --------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 RAW_DIR = BASE_DIR / "datasets" / "raw"
@@ -22,36 +11,12 @@ PROCESSED_DIR = BASE_DIR / "datasets" / "processed"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# --------------------------------------------------
-# REUSABLE INFLATION FILE PARSER
-# --------------------------------------------------
-
 def read_inflation_file(path, expected_months):
-    """Parse one raw Inflation Excel file into a long DataFrame.
-
-    Parameters
-    ----------
-    path : Path
-        Excel file to read (no header row).
-    expected_months : int
-        How many monthly columns each area/category should have,
-        used only for the validation message.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Columns: date, area, category, value, unit.
-    """
     raw = pd.read_excel(path, header=None)
 
-    # Observation rows start after the 4 header rows.
     data = raw.iloc[4:1684].copy()
-
-    # PSA repeats area names only on the first row of each block;
-    # forward-fill so every row knows its area.
     data[0] = data[0].ffill()
 
-    # Row 2 = year, row 3 = period (e.g. "Jan"). Skip "Ave" columns.
     years = raw.iloc[2].ffill()
     periods = raw.iloc[3]
 
@@ -66,7 +31,6 @@ def read_inflation_file(path, expected_months):
                 "month": period,
             })
 
-    # Convert wide layout to one row per (date, area, category).
     records = []
     for item in monthly_columns:
         col = item["column"]
@@ -83,7 +47,6 @@ def read_inflation_file(path, expected_months):
 
     long_df = pd.DataFrame(records)
 
-    # Validation summary.
     obs_rows = len(data)
     actual_rows = len(long_df)
     duplicates = long_df.duplicated(subset=["date", "area", "category"]).sum()
@@ -106,30 +69,17 @@ def read_inflation_file(path, expected_months):
     return long_df
 
 
-# --------------------------------------------------
-# LOAD AND VALIDATE EACH INFLATION FILE
-# --------------------------------------------------
-
 inflation1_long = read_inflation_file(RAW_DIR / "Inflation_1.xlsx", expected_months=48)
 
 inflation2_long = read_inflation_file(RAW_DIR / "Inflation_2.xlsx", expected_months=44)
-# Remove unavailable Sep-Dec 2026 observations.
 inflation2_long = inflation2_long.dropna(subset=["value"]).copy()
 
-
-# --------------------------------------------------
-# MERGE COMPLETE INFLATION DATASET
-# --------------------------------------------------
 
 inflation_clean = pd.concat([inflation1_long, inflation2_long], ignore_index=True)
 inflation_clean = inflation_clean.sort_values(
     by=["date", "area", "category"]
 ).reset_index(drop=True)
 
-
-# --------------------------------------------------
-# VALIDATE COMPLETE INFLATION
-# --------------------------------------------------
 
 final_duplicates = inflation_clean.duplicated(
     subset=["date", "area", "category"]
@@ -141,7 +91,6 @@ final_coverage = (
     .nunique()
 )
 
-# Jan 2019 through Aug 2026 = 92 months
 expected_months = 92
 expected_final_rows = (
     inflation_clean["area"].nunique()
@@ -187,10 +136,6 @@ print(
     final_validation_passed
 )
 
-
-# --------------------------------------------------
-# SAVE CLEANED INFLATION
-# --------------------------------------------------
 
 if final_validation_passed:
     inflation_output = PROCESSED_DIR / "inflation_clean.csv"
