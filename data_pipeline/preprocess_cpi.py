@@ -15,6 +15,12 @@ def read_cpi_file(path, expected_months):
     raw = pd.read_excel(path, header=None)
 
     data = raw.iloc[4:1684].copy()
+    
+    missing_areas = data[0].isna().sum()
+
+    print(f"\n--- {path.name} RAW DATA QUALITY ISSUES ---")
+    print("Missing ares:", missing_areas)
+
     data[0] = data[0].ffill()
 
     years = raw.iloc[2].ffill()
@@ -97,6 +103,22 @@ for item in monthly_columns3:
         })
 
 cpi3_long = pd.DataFrame(records3)
+
+
+missing_cpi = cpi3_long["value"].isna().sum()
+
+missing_months = (
+    cpi3_long.loc[cpi3_long["value"].isna(), "date"]
+    .dt.strftime("%Y-%m")
+    .value_counts()
+    .sort_index()
+)
+
+print("\n--- CPI_3 MISSING VALUE ISSUES ---")
+print("Unavailable CPI observations:", missing_cpi)
+print("Unavailable observations by month:")
+print(missing_months.to_string())
+
 cpi3_long = cpi3_long.dropna(subset=["value"]).copy()
 
 duplicates3 = cpi3_long.duplicated(subset=["date", "area", "category"]).sum()
